@@ -189,6 +189,25 @@ def main() -> None:
     ndvi = data["ndvi_summary"]
     market_meta = data.get("market_meta", {})
 
+    with st.sidebar:
+        st.divider()
+        st.markdown("### Fontes de Dados")
+        ptax = market_meta.get("ptax_fonte", "")
+        if "bcb_odata" in ptax:
+            st.sidebar.success("PTAX: API oficial BCB")
+        elif "scrape" in ptax:
+            st.sidebar.warning("PTAX: Web scraping (fallback)")
+        else:
+            st.sidebar.error("PTAX: Dataset sintético")
+
+        b3 = market_meta.get("b3_fonte", "")
+        if "b3_scrape" in b3 or "scrape" in b3:
+            st.sidebar.warning("B3: Web scraping")
+        elif "csv" in b3:
+            st.sidebar.error("B3: Dataset sintético")
+        else:
+            st.sidebar.info(f"B3: {b3 or 'sintético'}")
+
     # --- ESG Banner ---
     if esg["red_flag"]:
         st.markdown(
