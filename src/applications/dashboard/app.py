@@ -25,6 +25,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.core_logic.orchestrator import OrbitalOrchestrator, analysis_to_dict
+from src.market_data.ancord_defaults import (
+    ANCORD_AULA2_BASIS_CENTS,
+    ANCORD_AULA2_CAMBIO,
+    ANCORD_AULA2_CBOT_CENTS,
+    DEFAULT_SACA_RS,
+)
 from src.data_collection.serial_mqtt_reader import get_telemetry_store
 from src.rag.commercial_copilot import generate_briefing_markdown
 
@@ -157,8 +163,18 @@ def main() -> None:
             value=False,
             help="Ativa violação simulada em APP — bloqueio de originação.",
         )
-        saca = st.number_input("Preço físico (R$/saca)", value=138.50, step=0.5)
+        saca = st.number_input(
+            "Preço físico (R$/saca)",
+            value=DEFAULT_SACA_RS,
+            step=0.5,
+            help="Default: cash spot Ancord Agro 100 — Aula 2.",
+        )
         soil_manual = st.slider("Umidade solo manual (%)", 10.0, 50.0, 22.0, 0.5)
+        st.caption(
+            f"Ref. Ancord Aula 2: basis ≈ {ANCORD_AULA2_BASIS_CENTS:.1f} c/b "
+            f"(cash {DEFAULT_SACA_RS}, CBOT {ANCORD_AULA2_CBOT_CENTS:.0f}, "
+            f"câmbio {ANCORD_AULA2_CAMBIO})."
+        )
         refresh = st.button("Atualizar análise", type="primary")
         st.divider()
         st.markdown("**Legenda NDVI**")

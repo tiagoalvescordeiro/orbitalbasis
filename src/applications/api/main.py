@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
 
 from src.core_logic.orchestrator import OrbitalOrchestrator, analysis_to_dict
 from src.data_collection.serial_mqtt_reader import TelemetryPacket, get_telemetry_store
+from src.market_data.ancord_defaults import DEFAULT_SACA_RS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("orbitalbasis.api")
@@ -48,7 +49,7 @@ _telemetry = get_telemetry_store()
 class AnalysisRequest(BaseModel):
     esg_red_flag: bool = Field(False, description="Simula violação APP / Red Flag ESG")
     soil_moisture_pct: float = Field(22.0, ge=0, le=100)
-    saca_rs: float = Field(138.50, gt=0)
+    saca_rs: float = Field(DEFAULT_SACA_RS, gt=0)
 
 
 class TelemetryPayload(BaseModel):
@@ -83,7 +84,7 @@ def health() -> dict[str, str]:
 def run_analysis(
     esg_red_flag: bool = Query(False),
     soil_moisture_pct: float = Query(22.0),
-    saca_rs: float = Query(138.50),
+    saca_rs: float = Query(DEFAULT_SACA_RS),
     body: Optional[AnalysisRequest] = None,
 ) -> dict[str, Any]:
     try:

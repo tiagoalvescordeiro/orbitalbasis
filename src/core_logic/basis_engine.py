@@ -18,6 +18,10 @@ from typing import Literal, Optional
 
 CommodityCode = Literal["soja", "milho", "boi"]
 
+# Fator saca (60 kg) → bushel; alinhado Ancord Agro 100 / FMDAT27 (2,2046)
+SACA_TO_BUSHEL_FACTOR = 2.2046
+SOY_BUSHELS_PER_US_TON = 36.7454
+
 
 class CurveShape(str, Enum):
     """Formato da curva de futuros (oferta x demanda)."""
@@ -84,14 +88,19 @@ def basis_soja_cbot(
     cbot_cents_per_bu: float,
 ) -> float:
     """
-    Basis soja/trigo vs CBOT (%):
-    ((Saca R$ / Tx) / 2,204 - (CBOT/100)) * 100
+    Basis soja/trigo vs CBOT (cents/bushel):
+    ((Saca R$ / Tx) / 2,2046 - (CBOT/100)) * 100
     """
     if tx_cambio <= 0:
         raise ValueError("Taxa de câmbio deve ser positiva.")
     usd_per_saca = saca_rs / tx_cambio
     usd_per_bu = cbot_cents_per_bu / 100.0
-    return ((usd_per_saca / 2.204) - usd_per_bu) * 100.0
+    return ((usd_per_saca / SACA_TO_BUSHEL_FACTOR) - usd_per_bu) * 100.0
+
+
+def cbot_cents_to_usd_per_ton(cbot_cents_per_bu: float) -> float:
+    """Converte CBOT (cents/bu) para USD/t com fator Anec soja."""
+    return (cbot_cents_per_bu / 100.0) * SOY_BUSHELS_PER_US_TON
 
 
 def basis_milho_domestico(saca_rs: float, ccm_b3_rs: float) -> float:
@@ -232,7 +241,7 @@ def analyze_soja(
     market: MarketSnapshot,
     yield_ctx: YieldContext,
     futures_curve: list[float],
-    contrato_futuro_usd_t: float = 400.0,
+    contrato_futuro_usd_t: float | None = None,
 ) -> BasisResult:
     """Análise completa para soja (SJC / CBOT)."""
     if not yield_ctx.esg_compliant:
@@ -264,7 +273,10 @@ def analyze_soja(
         basis_atual, basis_ind, yield_ctx.yield_risk_score, curve, yield_ctx.esg_compliant
     )
 
-    flat = flat_fob_usd(contrato_futuro_usd_t, market.premio_exportacao_usd_t)
+    futuro_usd_t = contrato_futuro_usd_t
+    if futuro_usd_t is None:
+        futuro_usd_t = cbot_cents_to_usd_per_ton(market.cbot_cents_per_bu)
+    flat = flat_fob_usd(futuro_usd_t, market.premio_exportacao_usd_t)
     ppe = ppe_origem_rs_saca(
         flat,
         market.tx_cambio,

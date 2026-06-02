@@ -27,6 +27,7 @@ from src.core_logic.esg_compliance import (
     draw_esg_overlay,
 )
 from src.core_logic.esg_compliance import ESGVerdict
+from src.market_data.ancord_defaults import DEFAULT_SACA_RS
 from src.market_data.market_service import MarketDataService
 from src.ml_models.ndvi_processor import NDVIResult, process_demo_synthetic, process_field
 from src.rag.commercial_copilot import generate_briefing_markdown
@@ -58,7 +59,7 @@ class OrbitalOrchestrator:
         self,
         soil_moisture_pct: float = 22.0,
         esg_red_flag_demo: bool = False,
-        saca_rs: float = 138.50,
+        saca_rs: float = DEFAULT_SACA_RS,
     ) -> OrbitalAnalysis:
         self._market._saca_rs = saca_rs
         market, futures_curve, market_meta = self._market.build_snapshot()

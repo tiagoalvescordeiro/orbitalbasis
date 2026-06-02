@@ -1,3 +1,5 @@
+import pytest
+
 from src.core_logic.basis_engine import (
     CurveShape,
     HedgeStance,
@@ -6,7 +8,22 @@ from src.core_logic.basis_engine import (
     adjust_basis_indicativo,
     analyze_soja,
     basis_soja_cbot,
+    cbot_cents_to_usd_per_ton,
+    flat_fob_usd,
     infer_curve_shape,
+    ppe_origem_rs_saca,
+)
+from src.market_data.ancord_defaults import (
+    ANCORD_AULA1_CAMBIO,
+    ANCORD_AULA1_CBOT_CENTS,
+    ANCORD_AULA2_BASIS_CENTS,
+    ANCORD_AULA2_CAMBIO,
+    ANCORD_AULA2_CASH_RS_SACA,
+    ANCORD_AULA2_CBOT_CENTS,
+    ANCORD_FOBBINGS_USD_T,
+    ANCORD_FRETE_ORIGEM_RS_SACA,
+    ANCORD_PPE_EX_WORKS_RS_SACA,
+    ANCORD_PREMIO_FOB_USD_T,
 )
 
 
@@ -44,3 +61,40 @@ def test_analyze_soja_ok():
     result = analyze_soja(market, yield_ctx, futures_curve=[1080, 1095, 1110])
     assert result.basis_atual is not None
     assert result.hedge_stance in HedgeStance
+
+
+def test_ancord_aula2_basis_regression():
+    """Valida fórmula de basis contra exercício Ancord Agro 100 — Aula 2."""
+    basis = basis_soja_cbot(
+        ANCORD_AULA2_CASH_RS_SACA,
+        ANCORD_AULA2_CAMBIO,
+        ANCORD_AULA2_CBOT_CENTS,
+    )
+    assert basis == pytest.approx(ANCORD_AULA2_BASIS_CENTS, abs=0.01)
+
+
+def test_ancord_aula1_ppe_regression():
+    """PPE Ex-Works calibrado com cascata Ancord Agro 100 — Aula 1."""
+    futuro_usd_t = cbot_cents_to_usd_per_ton(ANCORD_AULA1_CBOT_CENTS)
+    flat = flat_fob_usd(futuro_usd_t, ANCORD_PREMIO_FOB_USD_T)
+    ppe = ppe_origem_rs_saca(
+        flat,
+        ANCORD_AULA1_CAMBIO,
+        ANCORD_FOBBINGS_USD_T,
+        ANCORD_FRETE_ORIGEM_RS_SACA,
+    )
+    assert ppe == pytest.approx(ANCORD_PPE_EX_WORKS_RS_SACA, abs=0.5)
+
+
+def test_analyze_soja_ppe_uses_cbot_conversion():
+    market = MarketSnapshot(
+        saca_rs=ANCORD_AULA2_CASH_RS_SACA,
+        tx_cambio=ANCORD_AULA1_CAMBIO,
+        cbot_cents_per_bu=ANCORD_AULA1_CBOT_CENTS,
+        premio_exportacao_usd_t=ANCORD_PREMIO_FOB_USD_T,
+        frete_origem_rs=ANCORD_FRETE_ORIGEM_RS_SACA,
+        fobbings_usd_t=ANCORD_FOBBINGS_USD_T,
+    )
+    yield_ctx = YieldContext(yield_risk_score=20, esg_compliant=True)
+    result = analyze_soja(market, yield_ctx, futures_curve=[1158, 1165, 1170])
+    assert result.ppe_hint_rs_saca == pytest.approx(ANCORD_PPE_EX_WORKS_RS_SACA, abs=0.5)
