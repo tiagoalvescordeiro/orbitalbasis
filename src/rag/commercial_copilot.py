@@ -116,6 +116,19 @@ def _generate_deterministic(rag_context: dict) -> str:
             f"{'elevado' if risk >= 60 else 'moderado' if risk >= 35 else 'contido'}**. "
             "A Teoria da Convergência sugere que o basis físico tende a fechar parte do spread "
             "em relação ao futuro padronizado.",
+        ]
+    )
+
+    convergence_multiplier = 1.0 + (risk / 100.0)
+    projected_gap = round(gap * convergence_multiplier, 2)
+    lines.extend(
+        [
+            "",
+            "#### Impacto Orbital na Convergência",
+            f"O risco de safra identificado pelos sensores orbitais e de borda "
+            f"(score = {risk}/100) projeta que o basis físico local pode se "
+            f"movimentar até **{projected_gap} pontos** antes do fechamento "
+            f"da convergência com o futuro B3.",
             "",
             "#### Risco de Base",
         ]
