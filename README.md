@@ -89,24 +89,20 @@ streamlit run src/applications/dashboard/app.py
 ## Estrutura do repositório
 
 ```
-src/
+src/                                 # Código (ver src/README.md)
 ├── ml_models/ndvi_processor.py      # NDVI matricial + limiarização
-├── core_logic/
-│   ├── basis_engine.py              # Basis, PPE, curva, convergência
-│   ├── esg_compliance.py            # Red flag APP
-│   ├── orchestrator.py              # OrbitalOrchestrator
-│   └── facades.py                   # SojaBasisEngine, NDVIProcessor, ...
-├── market_data/
-│   ├── ptax_client.py               # BCB OData + scrape + CSV
-│   └── b3_client.py                 # B3 scrape + CSV
-├── data_collection/serial_mqtt_reader.py
-├── rag/commercial_copilot.py
-├── applications/
-│   ├── api/main.py
-│   └── dashboard/app.py
+├── core_logic/                      # Basis, PPE, ESG, orchestrator
+├── market_data/                     # PTAX BCB + B3
+├── data_collection/                 # Telemetria ESP32
+├── rag/                             # ChromaDB + copiloto
+├── applications/                    # FastAPI + Streamlit
 └── hardware/esp32/field_node.ino
-docs/VIDEO_SCRIPT.md
-data/synthetic/                      # Fallback PTAX e B3
+docs/                                # Arquitetura, API, roteiros
+data/                                # Synthetic + knowledge RAG
+tests/                               # pytest
+models/                              # Template FIAP (ML em src/ml_models)
+notebooks/                           # Template FIAP (demos via scripts/)
+scripts/                             # run_demo, index_rag, start_all
 ```
 
 ---
