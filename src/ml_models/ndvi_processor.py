@@ -207,3 +207,30 @@ def process_from_files(red_path: Path, nir_path: Path) -> NDVIResult:
 def process_demo_synthetic(**kwargs) -> NDVIResult:
     red, nir = simulate_sentinel_bands(**kwargs)
     return process_field(red, nir)
+
+
+def export_ndvi_report_png(
+    red: np.ndarray,
+    nir: np.ndarray,
+    output_path: Path,
+    thresholds: NDVIThresholds | None = None,
+) -> Path:
+    """Gera e salva overlay color-coded como PNG para apresentações."""
+    result = process_field(red, nir, thresholds)
+    cv2.imwrite(str(output_path), result.overlay_bgr)
+    return output_path
+
+
+def adaptive_threshold_from_stddev(
+    ndvi: np.ndarray,
+    std_multiplier: float = 1.0,
+) -> NDVIThresholds:
+    """Threshold dinâmico baseado no desvio padrão do talhão."""
+    valid = np.isfinite(ndvi)
+    if not np.any(valid):
+        return NDVIThresholds()
+    mean = float(np.nanmean(ndvi[valid]))
+    std = float(np.nanstd(ndvi[valid]))
+    severe_max = np.clip(mean - std_multiplier * std, -1.0, 0.8)
+    attention_max = np.clip(mean + std_multiplier * std, severe_max + 0.05, 1.0)
+    return NDVIThresholds(severe_max=float(severe_max), attention_max=float(attention_max))
