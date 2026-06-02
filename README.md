@@ -145,7 +145,10 @@ Logs indicam a fonte utilizada (`bcb_odata`, `b3_scrape`, `csv_fallback`).
 
 | Nome | RM |
 |------|-----|
-| [Preencher] | [RM] |
+| Tiago Alves Cordeiro | 561791 |
+| Leandro Arthur Marinho Ferreira | 565240 |
+| Otavio Custodio de Oliveira | 565606 |
+| Matheus José Parra | 561907 |
 
 ---
 

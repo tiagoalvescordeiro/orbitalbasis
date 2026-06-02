@@ -182,7 +182,10 @@ docker compose up --build
 
 | Integrante | RM |
 |------------|-----|
-| [Nome] | [RM] |
+| Tiago Alves Cordeiro | 561791 |
+| Leandro Arthur Marinho Ferreira | 565240 |
+| Otavio Custodio de Oliveira | 565606 |
+| Matheus José Parra | 561907 |
 
 ---
 
