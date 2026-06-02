@@ -3,7 +3,7 @@
 **Global Solution FIAP 2026.1 · A Nova Economia Espacial**  
 **Curso:** Inteligência Artificial — 2º ano
 
-> Substitua `[NOME DO GRUPO]` e `[RMs]` antes da gravação.
+> Equipe: **OrbitalBasis Team** · RMs **561791, 565240, 565606, 561907**
 
 ---
 
@@ -11,11 +11,11 @@
 
 **[Tela: rosto do grupo ou slide institucional]**
 
-> **"[NOME DO GRUPO]. QUERO CONCORRER."**
+> **"OrbitalBasis Team. QUERO CONCORRER."**
 
 **[Corte para dashboard OrbitalBasis]**
 
-> "Somos o grupo [NOME DO GRUPO], RM [lista]. Apresentamos o **OrbitalBasis** — o copiloto que conecta dados orbitais, sensores de borda e o mercado físico de commodities agrícolas."
+> "Somos o grupo OrbitalBasis Team, RM 561791, 565240, 565606, 561907. Apresentamos o **OrbitalBasis** — o copiloto que conecta dados orbitais, sensores de borda e o mercado físico de commodities agrícolas."
 
 ---
 
@@ -85,7 +85,7 @@
 
 ## 4:45 – 5:00 | Encerramento
 
-> "OrbitalBasis: da órbita ao campo, do campo ao mercado. [NOME DO GRUPO]. QUERO CONCORRER. Obrigado."
+> "OrbitalBasis: da órbita ao campo, do campo ao mercado. OrbitalBasis Team. QUERO CONCORRER. Obrigado."
 
 **[Tela final: logo FIAP + QR GitHub]**
 
