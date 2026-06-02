@@ -24,7 +24,10 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$hasRemote = git remote get-url origin 2>$null
+$hasRemote = $false
+git remote get-url origin 2>$null | Out-Null
+if ($LASTEXITCODE -eq 0) { $hasRemote = $true }
+
 if (-not $hasRemote) {
     Write-Host "Criando repositorio $RepoName ($Visibility)..."
     gh repo create $RepoName --$Visibility --source=. --remote=origin --description=$Description --push
