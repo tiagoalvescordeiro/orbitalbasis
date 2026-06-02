@@ -34,6 +34,18 @@ from src.rag.commercial_copilot import generate_briefing_markdown
 
 logger = logging.getLogger(__name__)
 
+# Umidade ESP32 abaixo deste limiar reforça o choque de oferta (basis indicativo).
+SOIL_STRESS_MOISTURE_PCT = 18.0
+SOIL_STRESS_RISK_BOOST = 8
+
+
+def compute_yield_risk_score(ndvi_hint: int, soil_moisture_pct: float) -> int:
+    """Combina risco orbital (NDVI) com estresse hídrico de borda (IoT)."""
+    risk = max(0, min(100, int(ndvi_hint)))
+    if soil_moisture_pct < SOIL_STRESS_MOISTURE_PCT:
+        risk = min(100, risk + SOIL_STRESS_RISK_BOOST)
+    return risk
+
 
 @dataclass
 class OrbitalAnalysis:
@@ -84,8 +96,12 @@ class OrbitalOrchestrator:
         esg = check_app_infringement(red, nir, app_mask)
         overlay_esg = draw_esg_overlay(ndvi_result.overlay_bgr, app_mask, esg.red_flag)
 
+        yield_risk = compute_yield_risk_score(
+            ndvi_result.summary["yield_risk_hint"],
+            soil_moisture_pct,
+        )
         yield_ctx = YieldContext(
-            yield_risk_score=ndvi_result.summary["yield_risk_hint"],
+            yield_risk_score=yield_risk,
             ndvi_mean=ndvi_result.summary["ndvi_mean"],
             soil_moisture_pct=soil_moisture_pct,
             esg_compliant=esg.compliant,
@@ -145,8 +161,12 @@ def _run_legacy_manual_market(
     red, nir = simulate_sentinel_bands(stress_fraction=stress_fraction)
     app_mask = demo_app_mask_from_shape(red.shape)
     esg = check_app_infringement(red, nir, app_mask)
+    yield_risk = compute_yield_risk_score(
+        ndvi_result.summary["yield_risk_hint"],
+        soil_moisture_pct,
+    )
     yield_ctx = YieldContext(
-        yield_risk_score=ndvi_result.summary["yield_risk_hint"],
+        yield_risk_score=yield_risk,
         ndvi_mean=ndvi_result.summary["ndvi_mean"],
         soil_moisture_pct=soil_moisture_pct,
         esg_compliant=esg.compliant,
@@ -228,8 +248,12 @@ def run_from_bands(
         app_mask = demo_app_mask_from_shape(red.shape)
 
     esg = check_app_infringement(red, nir, app_mask)
+    yield_risk = compute_yield_risk_score(
+        ndvi_result.summary["yield_risk_hint"],
+        soil_moisture_pct,
+    )
     yield_ctx = YieldContext(
-        yield_risk_score=ndvi_result.summary["yield_risk_hint"],
+        yield_risk_score=yield_risk,
         ndvi_mean=ndvi_result.summary["ndvi_mean"],
         soil_moisture_pct=soil_moisture_pct,
         esg_compliant=esg.compliant,

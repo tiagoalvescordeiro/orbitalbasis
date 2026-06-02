@@ -24,6 +24,13 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass
+
 from src.core_logic.orchestrator import OrbitalOrchestrator, analysis_to_dict
 from src.market_data.ancord_defaults import (
     ANCORD_AULA2_BASIS_CENTS,
@@ -50,11 +57,11 @@ st.set_page_config(
 # --- CSS cinematográfico ---
 st.markdown(
     """
+    <meta name="google" content="notranslate" />
     <style>
     .main-header { font-size: 2rem; font-weight: 700; color: #0e3d5c; }
     .esg-ok { padding: 1rem; border-radius: 8px; background: #e8f5e9; border-left: 6px solid #2e7d32; }
     .esg-red { padding: 1rem; border-radius: 8px; background: #ffebee; border-left: 6px solid #c62828; }
-    .metric-card { background: #f5f9fc; padding: 0.75rem; border-radius: 6px; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -74,10 +81,13 @@ def get_telemetry():
 
 
 def fetch_analysis(esg_red_flag: bool, soil: float, saca: float) -> dict:
-    if USE_API:
+    use_api = os.getenv("ORBITAL_USE_API", "false").lower() == "true"
+    api_url = os.getenv("ORBITAL_API_URL", API_URL)
+
+    if use_api:
         try:
             resp = requests.get(
-                f"{API_URL}/api/v1/analysis",
+                f"{api_url}/api/v1/analysis",
                 params={
                     "esg_red_flag": esg_red_flag,
                     "soil_moisture_pct": soil,
@@ -92,9 +102,8 @@ def fetch_analysis(esg_red_flag: bool, soil: float, saca: float) -> dict:
             st.sidebar.warning("API offline — usando orchestrator local.")
 
     orch = get_orchestrator()
-    moisture = get_telemetry().latest_moisture() or soil
     analysis = orch.run(
-        soil_moisture_pct=moisture,
+        soil_moisture_pct=soil,
         esg_red_flag_demo=esg_red_flag,
         saca_rs=saca,
     )
@@ -170,6 +179,10 @@ def main() -> None:
             help="Default: cash spot Ancord Agro 100 — Aula 2.",
         )
         soil_manual = st.slider("Umidade solo manual (%)", 10.0, 50.0, 22.0, 0.5)
+        esp32_live = telemetry.latest_moisture()
+        if esp32_live is not None:
+            st.caption(f"ESP32 ao vivo: **{esp32_live:.1f}%** (telemetria na tabela)")
+        st.caption(f"Umidade usada na análise: **{soil_manual:.1f}%**")
         st.caption(
             f"Ref. Ancord Aula 2: basis ≈ {ANCORD_AULA2_BASIS_CENTS:.1f} c/b "
             f"(cash {DEFAULT_SACA_RS}, CBOT {ANCORD_AULA2_CBOT_CENTS:.0f}, "
@@ -185,6 +198,12 @@ def main() -> None:
         rag_mode = os.getenv("ORBITAL_RAG_MODE", "hybrid")
         st.markdown("**Copiloto RAG**")
         st.caption(f"Modo: `{rag_mode}` · ChromaDB + LangChain")
+        api_mode = os.getenv("ORBITAL_USE_API", "false").lower() == "true"
+        api_url = os.getenv("ORBITAL_API_URL", API_URL)
+        if api_mode:
+            st.success(f"Arquitetura distribuída → `{api_url}`")
+        else:
+            st.caption("Orchestrator local (defina ORBITAL_USE_API=true para API remota)")
         if os.getenv("OPENAI_API_KEY"):
             st.success("OPENAI_API_KEY detectada (modo LLM disponível)")
         else:
@@ -254,9 +273,12 @@ def main() -> None:
             st.image(overlay_rgb, caption="Segmentação: verde / amarelo / vermelho", use_container_width=True)
 
         m1, m2, m3, m4 = st.columns(4)
+        risk_score = data.get("rag_context", {}).get(
+            "yield_risk_score", ndvi.get("yield_risk_hint", 0)
+        )
         m1.metric("NDVI médio", f"{ndvi.get('ndvi_mean', 0):.3f}")
         m2.metric("Estresse severo", f"{ndvi.get('stress_pct_severe', 0):.1f}%")
-        m3.metric("Risco safra", f"{ndvi.get('yield_risk_hint', 0)}/100")
+        m3.metric("Risco safra", f"{risk_score}/100")
         m4.metric("APP stress", f"{esg.get('app_stress_pct', 0):.1f}%")
 
         st.markdown("**Telemetria ESP32 (edge-filtered)**")
@@ -276,6 +298,7 @@ def main() -> None:
             )
 
         chart_col1, chart_col2 = st.columns(2)
+        chart_key = f"{esg['red_flag']}_{basis['basis_atual']:.2f}"
         with chart_col1:
             st.plotly_chart(
                 plot_futures_curve(
@@ -283,19 +306,19 @@ def main() -> None:
                     basis["curve_shape"],
                 ),
                 use_container_width=True,
+                key=f"futures_{chart_key}",
             )
         with chart_col2:
             st.plotly_chart(
                 plot_basis(basis["basis_atual"], basis["basis_indicativo"]),
                 use_container_width=True,
+                key=f"basis_{chart_key}",
             )
 
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
         b1, b2, b3 = st.columns(3)
         b1.metric("Basis atual", f"{basis['basis_atual']:.2f}")
         b2.metric("Basis indicativo", f"{basis['basis_indicativo']:.2f}")
         b3.metric("Gap convergência", f"{basis['convergence_gap']:+.2f}")
-        st.markdown("</div>", unsafe_allow_html=True)
 
         if basis.get("ppe_hint_rs_saca"):
             st.metric("PPE hint (R$/saca)", f"{basis['ppe_hint_rs_saca']:.2f}")

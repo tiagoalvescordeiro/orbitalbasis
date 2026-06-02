@@ -9,6 +9,7 @@ Endpoints:
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -50,6 +51,10 @@ class AnalysisRequest(BaseModel):
     esg_red_flag: bool = Field(False, description="Simula violação APP / Red Flag ESG")
     soil_moisture_pct: float = Field(22.0, ge=0, le=100)
     saca_rs: float = Field(DEFAULT_SACA_RS, gt=0)
+    use_telemetry_soil: bool = Field(
+        False,
+        description="Se true, substitui soil_moisture_pct pela última leitura ESP32",
+    )
 
 
 class TelemetryPayload(BaseModel):
@@ -85,6 +90,10 @@ def run_analysis(
     esg_red_flag: bool = Query(False),
     soil_moisture_pct: float = Query(22.0),
     saca_rs: float = Query(DEFAULT_SACA_RS),
+    use_telemetry_soil: bool = Query(
+        False,
+        description="Substituir umidade manual pela última leitura ESP32",
+    ),
     body: Optional[AnalysisRequest] = None,
 ) -> dict[str, Any]:
     try:
@@ -92,10 +101,12 @@ def run_analysis(
             esg_red_flag = body.esg_red_flag
             soil_moisture_pct = body.soil_moisture_pct
             saca_rs = body.saca_rs
+            use_telemetry_soil = body.use_telemetry_soil
 
-        moisture = _telemetry.latest_moisture()
-        if moisture is not None:
-            soil_moisture_pct = moisture
+        if use_telemetry_soil or os.getenv("ORBITAL_USE_TELEMETRY_SOIL", "").lower() == "true":
+            moisture = _telemetry.latest_moisture()
+            if moisture is not None:
+                soil_moisture_pct = moisture
 
         analysis = _orchestrator.run(
             soil_moisture_pct=soil_moisture_pct,

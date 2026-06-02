@@ -13,6 +13,7 @@ from src.core_logic.basis_engine import (
     infer_curve_shape,
     ppe_origem_rs_saca,
 )
+from src.core_logic.orchestrator import compute_yield_risk_score
 from src.market_data.ancord_defaults import (
     ANCORD_AULA1_CAMBIO,
     ANCORD_AULA1_CBOT_CENTS,
@@ -28,7 +29,6 @@ from src.market_data.ancord_defaults import (
 
 
 def test_basis_soja_formula():
-    # Valores ilustrativos; valida apenas estrutura da fórmula
     b = basis_soja_cbot(saca_rs=140.0, tx_cambio=5.0, cbot_cents_per_bu=1000.0)
     assert isinstance(b, float)
 
@@ -98,3 +98,14 @@ def test_analyze_soja_ppe_uses_cbot_conversion():
     yield_ctx = YieldContext(yield_risk_score=20, esg_compliant=True)
     result = analyze_soja(market, yield_ctx, futures_curve=[1158, 1165, 1170])
     assert result.ppe_hint_rs_saca == pytest.approx(ANCORD_PPE_EX_WORKS_RS_SACA, abs=0.5)
+
+
+def test_cbot_cents_to_usd_per_ton():
+    usd_t = cbot_cents_to_usd_per_ton(1218.5)
+    assert 440 < usd_t < 460
+
+
+def test_soil_moisture_boosts_yield_risk_below_18():
+    assert compute_yield_risk_score(64, 22.0) == 64
+    assert compute_yield_risk_score(64, 17.0) == 72
+    assert compute_yield_risk_score(96, 15.0) == 100
