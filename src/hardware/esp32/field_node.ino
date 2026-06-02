@@ -22,6 +22,7 @@ const int PIN_SOIL = 34;
 const int WINDOW_SIZE = 20;
 const float ANOMALY_PCT = 0.15f;
 const unsigned long HOURLY_MS = 3600000UL;  // 1h simulada (demo: 60000 = 1 min)
+const int PIN_LED_RED = 12;
 
 float buffer[WINDOW_SIZE];
 int buffer_idx = 0;
@@ -69,19 +70,36 @@ bool should_transmit(float current, float mean) {
 }
 
 void publish_packet(float moisture, float mean, float stddev, const char* reason) {
-  char payload[256];
+  char payload[512];
+  int bucket_low = 0, bucket_normal = 0, bucket_high = 0;
+  for (int i = 0; i < buffer_count; i++) {
+    if (buffer[i] < mean - stddev) bucket_low++;
+    else if (buffer[i] > mean + stddev) bucket_high++;
+    else bucket_normal++;
+  }
   snprintf(payload, sizeof(payload),
     "{\"node\":\"esp32_01\",\"soil_moisture_pct\":%.2f,\"local_mean\":%.2f,"
-    "\"local_std\":%.2f,\"tx_reason\":\"%s\",\"edge_filtered\":true}",
-    moisture, mean, stddev, reason);
+    "\"local_std\":%.2f,\"tx_reason\":\"%s\",\"edge_filtered\":true,"
+    "\"histogram\":{\"low\":%d,\"normal\":%d,\"high\":%d}}",
+    moisture, mean, stddev, reason, bucket_low, bucket_normal, bucket_high);
   mqtt.publish(MQTT_TOPIC, payload);
   last_tx_ms = millis();
   Serial.println(payload);
+  if (strcmp(reason, "anomaly_15pct") == 0) {
+    for (int i = 0; i < 3; i++) {
+      digitalWrite(PIN_LED_RED, HIGH);
+      delay(200);
+      digitalWrite(PIN_LED_RED, LOW);
+      delay(200);
+    }
+  }
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_SOIL, INPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+  digitalWrite(PIN_LED_RED, LOW);
   analogSetAttenuation(ADC_11db);
 
   WiFi.begin(WIFI_SSID, WIFI_PASS);
