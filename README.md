@@ -129,7 +129,7 @@ Logs indicam a fonte utilizada (`bcb_odata`, `b3_scrape`, `csv_fallback`).
 
 ## Documentação
 
-- [Arquitetura do sistema](docs/ARCHITECTURE.md)
+- [Arquitetura do sistema](docs/ARQUITETURA.md)
 - [Especificação da API REST](docs/API_SPECIFICATION.md)
 - [Roteiro de vídeo 5 min](docs/ROTEIRO_DO_VIDEO.md) · [VIDEO_SCRIPT.md](docs/VIDEO_SCRIPT.md)
 - Fórmulas basis/PPE: `src/core_logic/basis_engine.py`
