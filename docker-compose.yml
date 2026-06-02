@@ -1,0 +1,47 @@
+services:
+  api:
+    build: .
+    container_name: orbitalbasis-api
+    command: uvicorn src.applications.api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - chroma_data:/app/data/chroma_db
+    environment:
+      - PYTHONPATH=/app
+      - ORBITAL_RAG_MODE=${ORBITAL_RAG_MODE:-hybrid}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  dashboard:
+    build: .
+    container_name: orbitalbasis-dashboard
+    command: >
+      streamlit run src/applications/dashboard/app.py
+      --server.port 8501
+      --server.address 0.0.0.0
+      --browser.gatherUsageStats false
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - chroma_data:/app/data/chroma_db
+    environment:
+      - PYTHONPATH=/app
+      - ORBITAL_USE_API=true
+      - ORBITAL_API_URL=http://api:8000
+      - ORBITAL_RAG_MODE=${ORBITAL_RAG_MODE:-hybrid}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  chroma_data:

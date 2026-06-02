@@ -1,0 +1,3 @@
+date,contract_code,settlement_cents_bu,curve_m1,curve_m2,curve_m3,fonte
+2026-06-02,SJCH26,1223.0,1220.0,1232.0,1245.0,fallback_synthetic
+2026-06-01,SJCH26,1218.5,1215.0,1228.0,1240.0,fallback_synthetic
