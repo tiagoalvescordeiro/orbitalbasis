@@ -11,4 +11,7 @@ Pasta do template oficial para Jupyter. Esta entrega prioriza scripts reproduzí
 | Indexação RAG | `python scripts/index_rag.py` |
 | Testes | `pytest tests/ -q` |
 
+| Treino ML **gratuito (Colab)** | `train_yield_risk_colab.ipynb` + `docs/ML_COLAB_GRATUITO.md` |
+| Treino ML no GCP (pago / créditos) | `train_yield_risk_vertex.ipynb` + `docs/ML_VERTEX_GCP.md` |
+
 Notebooks opcionais podem ser adicionados aqui para EDA de NDVI ou curvas B3 sem substituir os módulos em `src/`.
