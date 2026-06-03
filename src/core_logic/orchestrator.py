@@ -39,8 +39,30 @@ SOIL_STRESS_MOISTURE_PCT = 18.0
 SOIL_STRESS_RISK_BOOST = 8
 
 
-def compute_yield_risk_score(ndvi_hint: int, soil_moisture_pct: float) -> int:
-    """Combina risco orbital (NDVI) com estresse hídrico de borda (IoT)."""
+def _annotate_yield_risk_source(rag: dict) -> None:
+    from src.ml_models.yield_risk_predictor import get_model_metrics, ml_enabled
+
+    rag["yield_risk_source"] = "ml_random_forest" if ml_enabled() else "heuristic"
+    metrics = get_model_metrics()
+    if metrics:
+        rag["yield_risk_ml_metrics"] = {"mae": metrics.get("mae"), "r2": metrics.get("r2")}
+
+
+def compute_yield_risk_score(
+    ndvi_hint: int,
+    soil_moisture_pct: float,
+    ndvi_summary: dict | None = None,
+) -> int:
+    """
+    Risco de safra 0-100: ML (se modelo treinado) ou heurística NDVI + solo.
+    """
+    if ndvi_summary is not None:
+        from src.ml_models.yield_risk_predictor import predict_yield_risk
+
+        ml_score = predict_yield_risk(ndvi_summary, soil_moisture_pct)
+        if ml_score is not None:
+            return ml_score
+
     risk = max(0, min(100, int(ndvi_hint)))
     if soil_moisture_pct < SOIL_STRESS_MOISTURE_PCT:
         risk = min(100, risk + SOIL_STRESS_RISK_BOOST)
@@ -99,6 +121,7 @@ class OrbitalOrchestrator:
         yield_risk = compute_yield_risk_score(
             ndvi_result.summary["yield_risk_hint"],
             soil_moisture_pct,
+            ndvi_summary=ndvi_result.summary,
         )
         yield_ctx = YieldContext(
             yield_risk_score=yield_risk,
@@ -112,6 +135,7 @@ class OrbitalOrchestrator:
         rag = to_rag_context(basis, yield_ctx)
         rag["esg_app_stress_pct"] = esg.app_stress_pct
         rag["market_meta"] = market_meta
+        _annotate_yield_risk_source(rag)
 
         briefing = generate_briefing_markdown(rag)
         logger.info(
@@ -164,6 +188,7 @@ def _run_legacy_manual_market(
     yield_risk = compute_yield_risk_score(
         ndvi_result.summary["yield_risk_hint"],
         soil_moisture_pct,
+        ndvi_summary=ndvi_result.summary,
     )
     yield_ctx = YieldContext(
         yield_risk_score=yield_risk,
@@ -251,6 +276,7 @@ def run_from_bands(
     yield_risk = compute_yield_risk_score(
         ndvi_result.summary["yield_risk_hint"],
         soil_moisture_pct,
+        ndvi_summary=ndvi_result.summary,
     )
     yield_ctx = YieldContext(
         yield_risk_score=yield_risk,
@@ -262,6 +288,7 @@ def run_from_bands(
     basis = analyze_soja(market, yield_ctx, futures_curve)
     rag = to_rag_context(basis, yield_ctx)
     rag["esg_app_stress_pct"] = esg.app_stress_pct
+    _annotate_yield_risk_source(rag)
 
     return OrbitalAnalysis(
         ndvi=ndvi_result,

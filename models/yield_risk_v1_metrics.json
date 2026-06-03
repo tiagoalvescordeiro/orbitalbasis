@@ -1,0 +1,19 @@
+{
+  "model": "RandomForestRegressor",
+  "n_estimators": 120,
+  "rows_total": 3000,
+  "rows_train": 2400,
+  "rows_test": 600,
+  "mae": 0.067,
+  "r2": 0.9995,
+  "features": [
+    "ndvi_mean",
+    "ndvi_std",
+    "stress_pct_severe",
+    "stress_pct_attention",
+    "stress_pct_healthy",
+    "soil_moisture_pct"
+  ],
+  "target": "yield_risk_score",
+  "note": "Label = heurística OrbitalBasis (NDVI + solo). POC FIAP — substituir por dados reais depois."
+}

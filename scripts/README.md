@@ -8,6 +8,8 @@ Utilitários para subir o ecossistema, indexar RAG e validar a POC.
 | `index_rag.py` | Indexa `data/rag/knowledge/` no ChromaDB |
 | `start_all.ps1` | Sobe API (uvicorn) e dashboard (Streamlit) no Windows |
 | `run_dashboard_api.ps1` | Dashboard em modo distribuído (consome FastAPI em :8000) |
+| `generate_training_dataset.py` | Gera Parquet para ML (yield_risk) |
+| `train_yield_risk.py` | Treina Random Forest local (sem GCP) |
 | `publish_github.ps1` | Publicação auxiliar no GitHub |
 
 ### Exemplos

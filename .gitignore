@@ -34,6 +34,10 @@ htmlcov/
 
 # Chroma / ML artifacts (regeneráveis)
 data/chroma_db/
+data/training/*.parquet
+
+# Modelos treinados (versionar yield_risk_v1.joblib no repo se desejado)
+# models/*.joblib
 
 # OpenCV / notebooks temporários
 *.log

@@ -132,6 +132,7 @@ Logs indicam a fonte utilizada (`bcb_odata`, `b3_scrape`, `csv_fallback`).
 - [Arquitetura do sistema](docs/ARQUITETURA.md)
 - [Especificação da API REST](docs/API_SPECIFICATION.md)
 - [Roteiro de vídeo 5 min](docs/ROTEIRO_DO_VIDEO.md) · [VIDEO_SCRIPT.md](docs/VIDEO_SCRIPT.md)
+- [ML local (risco de safra)](docs/ML_GETTING_STARTED.md)
 - Fórmulas basis/PPE: `src/core_logic/basis_engine.py`
 - Prompt RAG: `src/rag/prompts/briefing_template.txt`
 

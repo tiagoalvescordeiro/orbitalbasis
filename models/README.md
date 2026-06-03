@@ -1,19 +1,24 @@
 ## Models — Artefatos de ML
 
-Pasta reservada ao template FIAP Global Solution. Os modelos e pipelines desta POC ficam em código em `src/ml_models/`.
+### Treino local (recomendado para FIAP)
 
-### Implementação ativa
+```bash
+python scripts/generate_training_dataset.py
+python scripts/train_yield_risk.py
+```
+
+| Artefato | Descrição |
+|----------|-----------|
+| `yield_risk_v1.joblib` | Random Forest — risco de safra 0–100 |
+| `yield_risk_v1_metrics.json` | MAE, R², features |
+
+Ver `docs/ML_GETTING_STARTED.md`.
+
+### Implementação em código
 
 | Componente | Localização |
 |------------|-------------|
-| NDVI matricial (OpenCV) | `src/ml_models/ndvi_processor.py` |
-| Facade `NDVIProcessor` | `src/core_logic/facades.py` |
+| NDVI (OpenCV) | `src/ml_models/ndvi_processor.py` |
+| Preditor ML | `src/ml_models/yield_risk_predictor.py` |
 
-### Uso
-
-```bash
-pytest tests/test_ndvi_processor.py -q
-python scripts/run_demo.py
-```
-
-Artefatos treinados (se houver no futuro) devem ser versionados aqui ou ignorados via `.gitignore`; embeddings RAG ficam em `data/chroma_db/` (regenerável).
+Embeddings RAG: `data/chroma_db/` (regenerável, ver `.gitignore`).

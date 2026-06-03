@@ -39,6 +39,7 @@ from src.market_data.ancord_defaults import (
     DEFAULT_SACA_RS,
 )
 from src.data_collection.serial_mqtt_reader import get_telemetry_store
+from src.ml_models.yield_risk_predictor import get_model_metrics, ml_enabled
 from src.rag.commercial_copilot import generate_briefing_markdown
 
 logging.basicConfig(level=logging.INFO)
@@ -198,6 +199,11 @@ def main() -> None:
         rag_mode = os.getenv("ORBITAL_RAG_MODE", "hybrid")
         st.markdown("**Copiloto RAG**")
         st.caption(f"Modo: `{rag_mode}` · ChromaDB + LangChain")
+        if ml_enabled():
+            m = get_model_metrics() or {}
+            st.success(f"ML risco safra ativo (R²={m.get('r2', '—')}, MAE={m.get('mae', '—')})")
+        else:
+            st.caption("Risco safra: heurística (rode train_yield_risk.py para ML)")
         api_mode = os.getenv("ORBITAL_USE_API", "false").lower() == "true"
         api_url = os.getenv("ORBITAL_API_URL", API_URL)
         if api_mode:
