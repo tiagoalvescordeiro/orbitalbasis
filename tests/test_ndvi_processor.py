@@ -1,10 +1,12 @@
 import numpy as np
+import pytest
 
 from src.ml_models.ndvi_processor import (
     NDVIThresholds,
     StressClass,
     compute_ndvi_matrix,
     process_demo_synthetic,
+    process_field,
     segment_ndvi,
 )
 
@@ -29,3 +31,17 @@ def test_demo_pipeline_returns_summary():
     result = process_demo_synthetic(seed=1)
     assert "yield_risk_hint" in result.summary
     assert result.overlay_bgr.shape[0] == result.ndvi.shape[0]
+
+
+def test_process_field_rejects_mismatched_shapes():
+    red = np.ones((4, 4), dtype=np.float32)
+    nir = np.ones((3, 3), dtype=np.float32)
+    with pytest.raises(ValueError, match="mesma resolução"):
+        process_field(red, nir)
+
+
+def test_process_field_rejects_empty_bands():
+    red = np.array([], dtype=np.float32).reshape(0, 0)
+    nir = np.array([], dtype=np.float32).reshape(0, 0)
+    with pytest.raises(ValueError, match="vazias"):
+        process_field(red, nir)

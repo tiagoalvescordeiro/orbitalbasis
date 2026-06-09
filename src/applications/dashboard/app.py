@@ -81,7 +81,12 @@ def get_telemetry():
     return store
 
 
-def fetch_analysis(esg_red_flag: bool, soil: float, saca: float) -> dict:
+def fetch_analysis(
+    esg_red_flag: bool,
+    soil: float,
+    saca: float,
+    use_telemetry_soil: bool = False,
+) -> dict:
     use_api = os.getenv("ORBITAL_USE_API", "false").lower() == "true"
     api_url = os.getenv("ORBITAL_API_URL", API_URL)
 
@@ -93,6 +98,7 @@ def fetch_analysis(esg_red_flag: bool, soil: float, saca: float) -> dict:
                     "esg_red_flag": esg_red_flag,
                     "soil_moisture_pct": soil,
                     "saca_rs": saca,
+                    "use_telemetry_soil": use_telemetry_soil,
                 },
                 timeout=30,
             )
@@ -179,11 +185,19 @@ def main() -> None:
             step=0.5,
             help="Default: cash spot Ancord Agro 100 — Aula 2.",
         )
-        soil_manual = st.slider("Umidade solo manual (%)", 10.0, 50.0, 22.0, 0.5)
         esp32_live = telemetry.latest_moisture()
+        use_esp32 = st.checkbox(
+            "Usar telemetria ESP32 na análise",
+            value=esp32_live is not None,
+            disabled=esp32_live is None,
+            help="Substitui umidade manual pela última leitura edge-filtered do ESP32.",
+        )
+        soil_manual = st.slider("Umidade solo manual (%)", 10.0, 50.0, 22.0, 0.5)
         if esp32_live is not None:
             st.caption(f"ESP32 ao vivo: **{esp32_live:.1f}%** (telemetria na tabela)")
-        st.caption(f"Umidade usada na análise: **{soil_manual:.1f}%**")
+        soil_for_analysis = esp32_live if (use_esp32 and esp32_live is not None) else soil_manual
+        source_label = "ESP32" if (use_esp32 and esp32_live is not None) else "manual"
+        st.caption(f"Umidade usada na análise ({source_label}): **{soil_for_analysis:.1f}%**")
         st.caption(
             f"Ref. Ancord Aula 2: basis ≈ {ANCORD_AULA2_BASIS_CENTS:.1f} c/b "
             f"(cash {DEFAULT_SACA_RS}, CBOT {ANCORD_AULA2_CBOT_CENTS:.0f}, "
@@ -218,7 +232,12 @@ def main() -> None:
     if refresh or "payload" not in st.session_state:
         with st.spinner("Processando órbita → campo → mercado..."):
             try:
-                st.session_state["payload"] = fetch_analysis(esg_red, soil_manual, saca)
+                st.session_state["payload"] = fetch_analysis(
+                    esg_red,
+                    soil_for_analysis,
+                    saca,
+                    use_telemetry_soil=use_esp32 and esp32_live is not None,
+                )
             except Exception as exc:
                 st.error(f"Erro na análise: {exc}")
                 logger.exception("Dashboard analysis failed")

@@ -21,3 +21,4 @@ langchain-openai>=0.0.5
 langchain-text-splitters>=0.0.1
 chromadb>=0.4.0
 onnxruntime>=1.16.0
+reportlab>=4.0.0

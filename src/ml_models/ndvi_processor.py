@@ -192,6 +192,12 @@ def process_field(
     generate_overlay: bool = True,
 ) -> NDVIResult:
     """Pipeline completo: NDVI → limiarização → overlay → resumo."""
+    if red.shape != nir.shape:
+        raise ValueError(
+            f"Bandas Red e NIR devem ter a mesma resolução: {red.shape} vs {nir.shape}"
+        )
+    if red.size == 0:
+        raise ValueError("Bandas vazias — nada a processar.")
     ndvi = compute_ndvi_matrix(red, nir)
     labels = segment_ndvi(ndvi, thresholds)
     overlay = build_stress_overlay(labels) if generate_overlay else np.zeros((1, 1, 3), np.uint8)
