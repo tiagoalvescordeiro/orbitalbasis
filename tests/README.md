@@ -13,5 +13,6 @@ pytest tests/ -q
 | `test_basis_engine.py` | Basis, curva, convergência, bloqueio ESG |
 | `test_market_data.py` | PTAX, B3, fallbacks |
 | `test_rag_copilot.py` | Briefing RAG, modos deterministic/hybrid |
+| `test_qa_mvp_resilience.py` | Cenários de falha, borda e resiliência do MVP |
 
-**Última execução:** 25 testes passando.
+**Última execução:** 53 testes passando.

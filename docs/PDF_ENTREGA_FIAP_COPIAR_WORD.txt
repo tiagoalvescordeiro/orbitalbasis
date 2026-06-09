@@ -135,7 +135,7 @@ No dashboard Streamlit, o checkbox "Simular Cenário de Risco ESG (Bandeira Verm
 
     ESP32 (field_node.ino): média móvel local; transmissão se desvio igual ou superior a 15% ou na janela horária.
     RAG: base data/rag/knowledge/ indexada em ChromaDB; modos deterministic, hybrid e llm.
-    Testes automatizados: pytest com 25 testes (NDVI, basis, ML, RAG, mercado).
+    Testes automatizados: pytest com 53 testes (NDVI, basis, ML, RAG, mercado, resiliência QA).
 
 
 2.7 Integração das disciplinas — Fases 3 e 4 (FIAP)
@@ -203,7 +203,7 @@ Repositório GitHub:
     https://github.com/tiagoalvescordeiro/orbitalbasis
 
 Vídeo demonstrativo (YouTube — visibilidade NÃO LISTADO):
-    [COLE AQUI O LINK DO YOUTUBE APÓS A GRAVAÇÃO]
+    Pendente — fora do escopo desta versão. Demonstração comprovada via repositório GitHub, assets e figura do dashboard neste PDF.
 
 Documentação complementar (arquitetura):
     https://github.com/tiagoalvescordeiro/orbitalbasis/blob/main/docs/ARQUITETURA.md

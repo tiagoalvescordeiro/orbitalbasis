@@ -1,6 +1,19 @@
 # Instruções rápidas — exportar PDF para a FIAP
 
-## Arquivo para colar no Word
+## Caminho recomendado (automático)
+
+Na raiz do projeto:
+
+```bash
+python scripts/generate_assets.py   # opcional — atualiza figuras
+python scripts/generate_entrega_pdf.py
+```
+
+Saída canônica: **`docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf`** (cópia também em `Downloads/`).
+
+---
+
+## Caminho manual (Word / Google Docs)
 
 Use: **`PDF_ENTREGA_FIAP_COPIAR_WORD.txt`** (texto limpo, sem Markdown).
 
@@ -16,7 +29,7 @@ Alternativa com tabelas Markdown: `PDF_ENTREGA_FIAP.md`.
 4. Título da página 1 e frase de pódio → **negrito**, 14 pt.
 5. Seção 3 → **Inserir imagem** (sua captura do dashboard).
 6. Seção 5 → substitua `[COLE AQUI O LINK...]` pelo URL do YouTube.
-7. **Arquivo → Salvar como → PDF** → nome sugerido: `OrbitalBasis_GlobalSolution_2026.1.pdf`.
+7. **Arquivo → Salvar como → PDF** → nome: `OrbitalBasis_Entrega_FIAP_2026.1.pdf`.
 
 ---
 

@@ -8,7 +8,8 @@
 - `OrbitalBasis_Entrega_FIAP_2026.1.pdf` — PDF gerado (`python scripts/generate_entrega_pdf.py`)
 - `INSTRUCOES_EXPORTAR_PDF.md` — Como exportar um único PDF
 - `CHECKLIST_GRAVACAO_5MIN.md` — Cronômetro 5 min para gravação do vídeo
-- `ROTEIRO_DO_VIDEO.md` / `VIDEO_SCRIPT.md` — Roteiro com "QUERO CONCORRER"
+- `ROTEIRO_DO_VIDEO.md` — Roteiro com "QUERO CONCORRER"
+- `CONFORMIDADE_FIAP.md` — Matriz de conformidade com o enunciado
 
 ### Assets visuais
 

@@ -70,4 +70,4 @@ Workbench → instância → **Stop** quando não estiver usando.
 
 ## Alternativa zero-console
 
-Instale [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) no Windows e use `scripts/gcp_setup.ps1` (se disponível no repo).
+Instale [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) no Windows e siga `scripts/gcp_train_commands.sh` para autenticação e jobs no Vertex.

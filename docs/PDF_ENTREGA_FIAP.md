@@ -125,7 +125,7 @@ No dashboard: checkbox **“Simular Cenário de Risco ESG (Bandeira Vermelha)”
 
 - **ESP32** (`field_node.ino`): média móvel local; transmissão se desvio ≥ 15% ou janela horária.  
 - **RAG:** base `data/rag/knowledge/` indexada em ChromaDB; modos `deterministic`, `hybrid`, `llm` via `ORBITAL_RAG_MODE`.  
-- **Testes:** `pytest` — 25 testes automatizados (NDVI, basis, ML, RAG, mercado).
+- **Testes:** `pytest` — 53 testes automatizados (NDVI, basis, ML, RAG, mercado, resiliência QA).
 
 ### 2.7 Integração das disciplinas — Fases 3 e 4 (FIAP)
 
