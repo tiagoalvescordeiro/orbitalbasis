@@ -13,6 +13,7 @@ Utilitários para subir o ecossistema, indexar RAG e validar a POC.
 | `gcp_train_commands.sh` | Treino ML no Vertex AI Workbench (opcional, créditos GCP) |
 | `publish_github.ps1` | Publicação auxiliar no GitHub |
 | `generate_entrega_pdf.py` | Gera PDF de entrega FIAP (`docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf`) |
+| `generate_assets.py` | Gera PNGs em `assets/` (dashboard, NDVI, arquitetura, IoT) |
 
 ### Exemplos
 

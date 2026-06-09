@@ -10,6 +10,10 @@
 - `CHECKLIST_GRAVACAO_5MIN.md` — Cronômetro 5 min para gravação do vídeo
 - `ROTEIRO_DO_VIDEO.md` / `VIDEO_SCRIPT.md` — Roteiro com "QUERO CONCORRER"
 
+### Assets visuais
+
+- `../assets/README.md` — Dashboard, NDVI, arquitetura, IoT (gerar com `scripts/generate_assets.py`)
+
 ### Técnica
 
 - `ARQUITETURA.md` — Diagrama e componentes (Fases 3 e 4)

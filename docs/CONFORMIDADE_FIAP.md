@@ -56,9 +56,11 @@
 | PDF único | OK | `docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf` |
 | Código em texto (não screenshot) | OK | `PDF_ENTREGA_FIAP_COPIAR_WORD.txt` |
 | Vídeo ≤ 5 min (YouTube não listado) | Pendente | Gravar e colar link |
-| 25 testes pytest | OK | `pytest tests/ -q` → 25 passed |
+| 53 testes pytest | OK | `pytest tests/ -q` → 53 passed |
 | ESG Red Flag na demo | OK | Dashboard checkbox + API `esg_red_flag=true` |
 | ML ativo na demo | OK | Sidebar dashboard + `models/yield_risk_v1.joblib` |
+| Assets visuais | OK | `assets/` — dashboard, NDVI, arquitetura, IoT, logo FIAP |
+| Figura no PDF | OK | `dashboard_demo.png` embutido via `generate_entrega_pdf.py` |
 
 ---
 
@@ -68,4 +70,4 @@
 2. Confirmar **e-mails @fiap.com.br** com a turma.
 3. Gravar vídeo (primeiros 15 s: *"OrbitalBasis Team. QUERO CONCORRER."*).
 4. Inserir link YouTube no README, PDF e portal FIAP.
-5. (Opcional) Inserir captura do dashboard no PDF antes do envio final.
+5. (Opcional) Substituir PNGs por prints reais do Streamlit após gravação do vídeo.

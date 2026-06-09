@@ -9,11 +9,12 @@
 - [x] Código MVP (ML, NDVI, ESG, API, dashboard, RAG, ESP32)
 - [x] README alinhado ao [template FIAP Global-Solution-2](https://github.com/CaiqueFiap-2026/TEMPLATE-TIAO-2026/tree/main/2TIAO/Global-Solution-2) (integrantes, execução, pódio, histórico)
 - [x] Estrutura `src/`, `data/`, `docs/` + extensões `models/`, `scripts/`, `tests/`, `notebooks/`
-- [x] 25 testes pytest passando (validado localmente em 09/06/2026)
+- [x] 53 testes pytest passando
 - [x] Modelo `models/yield_risk_v1.joblib` e métricas no repositório remoto
 - [x] PDF `docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf` no GitHub
 - [x] Docs GCP Vertex (`ML_VERTEX_GCP.md`, notebook e script) — incluir no próximo push
 - [x] Licença CC BY 4.0 (`LICENSE`) + workflow CI pytest
+- [x] Pasta `assets/` com dashboard, NDVI, arquitetura e IoT (`python scripts/generate_assets.py`)
 - [ ] E-mails institucionais confirmados com a turma (README e PDF)
 - [ ] Tutor(a) e Coordenador(a) preenchidos no README
 - [ ] `git push` final após preencher vídeo e professores
@@ -28,7 +29,8 @@
 - [ ] Página 1: **OrbitalBasis Team. QUERO CONCORRER.** + 4 nomes + e-mails
 - [ ] Seções: Introdução, Desenvolvimento, Resultados, Conclusões, Links
 - [ ] Código em texto (Consolas) — **sem screenshot de código**
-- [ ] Inserir diagrama (de `ARQUITETURA.md`) e 1 print do dashboard
+- [x] Diagrama (`assets/arquitetura_orbitalbasis.png`) e print dashboard (`assets/dashboard_demo.png`)
+- [x] PDF regenerado com figura embutida (`python scripts/generate_entrega_pdf.py`)
 - [ ] Link GitHub + YouTube na última página
 - [ ] Exportar **um** arquivo `.pdf`
 - [ ] Colar link do PDF no README (se hospedar no Drive) ou anexar no portal

@@ -47,9 +47,10 @@ Alinhada ao [template FIAP TIAO 2026](https://github.com/CaiqueFiap-2026/TEMPLAT
 src/          # Código-fonte (NDVI, ML, basis, ESG, RAG, API, dashboard, ESP32)
 data/         # CSV sintéticos, knowledge RAG, training/
 docs/         # Arquitetura, API, PDF, roteiro vídeo, checklists
+assets/       # Screenshots, NDVI, diagrama arquitetura, IoT (FIAP)
 models/       # yield_risk_v1.joblib + métricas
-scripts/      # Treino ML, demo, RAG, start_all
-tests/        # pytest (25 testes)
+scripts/      # Treino ML, demo, RAG, start_all, generate_assets
+tests/        # pytest (53 testes)
 notebooks/    # Colab gratuito (treino ML)
 ```
 
@@ -67,6 +68,11 @@ notebooks/    # Colab gratuito (treino ML)
 | Checklist vídeo 5 min | [docs/CHECKLIST_GRAVACAO_5MIN.md](docs/CHECKLIST_GRAVACAO_5MIN.md) |
 | Checklist entrega final | [docs/ENTREGA_FINAL_CHECKLIST.md](docs/ENTREGA_FINAL_CHECKLIST.md) |
 | Conformidade enunciado FIAP | [docs/CONFORMIDADE_FIAP.md](docs/CONFORMIDADE_FIAP.md) |
+| Assets visuais (dashboard, NDVI, arquitetura) | [assets/README.md](assets/README.md) |
+
+**Pré-visualização do dashboard:**
+
+![Dashboard demo ESG OK](assets/dashboard_demo.png)
 
 **Competição / pódio:** o grupo **OrbitalBasis Team** declara interesse em participar do **pódio** da Global Solution 2026.1 e autoriza avaliação do vídeo e do repositório para esse fim.
 
@@ -85,7 +91,8 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 python scripts/index_rag.py     # opcional — RAG
-pytest tests/ -q                # 25 testes
+python scripts/generate_assets.py  # PNGs para PDF e README
+pytest tests/ -q                # 53 testes
 ```
 
 **Terminal 1 — API:**

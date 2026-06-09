@@ -15,6 +15,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import (
     HRFlowable,
+    Image,
     PageBreak,
     Paragraph,
     Preformatted,
@@ -25,6 +26,7 @@ from reportlab.platypus import (
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "PDF_ENTREGA_FIAP_COPIAR_WORD.txt"
 OUTPUT = ROOT / "docs" / "OrbitalBasis_Entrega_FIAP_2026.1.pdf"
+DASHBOARD_ASSET = ROOT / "assets" / "dashboard_demo.png"
 
 SEP_HEAVY = re.compile(r"^═+$")
 SEP_LIGHT = re.compile(r"^=+$")
@@ -191,7 +193,19 @@ def build_story_from_txt() -> list:
             continue
 
         if stripped.startswith("[ESPAÇO RESERVADO"):
-            story.append(Paragraph(f"<i>{_escape_xml(stripped)}</i>", s["note"]))
+            if DASHBOARD_ASSET.exists():
+                img = Image(str(DASHBOARD_ASSET), width=14 * cm, height=7.9 * cm)
+                story.append(Spacer(1, 0.2 * cm))
+                story.append(img)
+                story.append(
+                    Paragraph(
+                        "<i>Figura 1 — Dashboard OrbitalBasis (demo ESG OK). "
+                        "Fonte: assets/dashboard_demo.png</i>",
+                        s["note"],
+                    )
+                )
+            else:
+                story.append(Paragraph(f"<i>{_escape_xml(stripped)}</i>", s["note"]))
             i += 1
             continue
 
