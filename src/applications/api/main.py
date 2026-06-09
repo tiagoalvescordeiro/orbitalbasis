@@ -51,6 +51,8 @@ class AnalysisRequest(BaseModel):
     esg_red_flag: bool = Field(False, description="Simula violação APP / Red Flag ESG")
     soil_moisture_pct: float = Field(22.0, ge=0, le=100)
     saca_rs: float = Field(DEFAULT_SACA_RS, gt=0)
+    active_commodity: str = Field("soja")
+    local_prices: dict = Field(default_factory=dict)
     use_telemetry_soil: bool = Field(
         False,
         description="Se true, substitui soil_moisture_pct pela última leitura ESP32",
@@ -64,6 +66,31 @@ class TelemetryPayload(BaseModel):
     local_std: float = 0.0
     tx_reason: str = "api_post"
     edge_filtered: bool = True
+
+class ChatMessage(BaseModel):
+    message: str
+    rag_context: dict
+
+@app.post("/api/v1/chat")
+def chat_with_copilot(payload: ChatMessage) -> dict[str, str]:
+    try:
+        from src.rag.commercial_copilot import _generate_with_langchain
+        
+        knowledge = "Contexto via chat de painel em tempo real."
+        llm_reply = _generate_with_langchain(payload.rag_context, knowledge)
+        
+        if llm_reply:
+            return {"reply": llm_reply}
+            
+        basis = payload.rag_context.get("basis_atual", 0)
+        gap = payload.rag_context.get("convergence_gap", 0)
+        risk = payload.rag_context.get("yield_risk_score", 0)
+        
+        fallback = f"**[Modo Simulação Offline]** Não consegui acessar a OpenAI (falta de chave).\n\nMas analisando o seu dashboard: o **Basis atual é {basis:.2f}** e seu gap de convergência é {gap:+.2f}. O risco de safra da fazenda está em {risk}/100."
+        return {"reply": fallback}
+    except Exception as exc:
+        logger.exception("Falha no chat")
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @app.on_event("startup")
@@ -96,12 +123,17 @@ def run_analysis(
     ),
     body: Optional[AnalysisRequest] = None,
 ) -> dict[str, Any]:
+    active_commodity = "soja"
+    local_prices = {}
+
     try:
         if body is not None:
             esg_red_flag = body.esg_red_flag
             soil_moisture_pct = body.soil_moisture_pct
             saca_rs = body.saca_rs
             use_telemetry_soil = body.use_telemetry_soil
+            active_commodity = body.active_commodity
+            local_prices = body.local_prices
 
         if use_telemetry_soil or os.getenv("ORBITAL_USE_TELEMETRY_SOIL", "").lower() == "true":
             moisture = _telemetry.latest_moisture()
@@ -112,6 +144,8 @@ def run_analysis(
             soil_moisture_pct=soil_moisture_pct,
             esg_red_flag_demo=esg_red_flag,
             saca_rs=saca_rs,
+            active_commodity=active_commodity,
+            local_prices=local_prices
         )
         return analysis_to_dict(analysis)
     except Exception as exc:

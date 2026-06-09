@@ -19,6 +19,7 @@ from src.core_logic.basis_engine import (
     MarketSnapshot,
     YieldContext,
     analyze_soja,
+    analyze_milho,
     to_rag_context,
 )
 from src.core_logic.esg_compliance import (
@@ -81,6 +82,7 @@ class OrbitalAnalysis:
     market_meta: dict
     futures_curve: list[float]
     overlay_esg_bgr: Optional[np.ndarray] = None
+    all_ndvis_bgr: Optional[dict[str, np.ndarray]] = None
 
 
 class OrbitalOrchestrator:
@@ -94,7 +96,10 @@ class OrbitalOrchestrator:
         soil_moisture_pct: float = 22.0,
         esg_red_flag_demo: bool = False,
         saca_rs: float = DEFAULT_SACA_RS,
+        active_commodity: str = "soja",
+        local_prices: dict = None,
     ) -> OrbitalAnalysis:
+        local_prices = local_prices or {}
         self._market._saca_rs = saca_rs
         market, futures_curve, market_meta = self._market.build_snapshot()
 
@@ -103,7 +108,7 @@ class OrbitalOrchestrator:
 
         from src.ml_models.ndvi_processor import simulate_sentinel_bands
 
-        red, nir = simulate_sentinel_bands(stress_fraction=stress_fraction)
+        red, nir = simulate_sentinel_bands(stress_fraction=stress_fraction, commodity=active_commodity)
         app_mask = demo_app_mask_from_shape(red.shape)
 
         if esg_red_flag_demo:
@@ -117,6 +122,13 @@ class OrbitalOrchestrator:
 
         esg = check_app_infringement(red, nir, app_mask)
         overlay_esg = draw_esg_overlay(ndvi_result.overlay_bgr, app_mask, esg.red_flag)
+        
+        # Gerar o NDVI para todas as culturas para mostrar simultaneamente
+        all_ndvis = {}
+        for c in ["soja", "milho", "cafe", "boi"]:
+            r, n = simulate_sentinel_bands(stress_fraction=stress_fraction, commodity=c)
+            n_res = process_field(r, n)
+            all_ndvis[c] = draw_esg_overlay(n_res.overlay_bgr, demo_app_mask_from_shape(r.shape), esg.red_flag) if esg_red_flag_demo else n_res.overlay_bgr
 
         yield_risk = compute_yield_risk_score(
             ndvi_result.summary["yield_risk_hint"],
@@ -131,7 +143,12 @@ class OrbitalOrchestrator:
             esg_message=esg.message,
         )
 
-        basis = analyze_soja(market, yield_ctx, futures_curve)
+        if active_commodity == "milho":
+            market.b3_futures_rs = (market.corn_cents_per_bu / 100.0) * 2.3622 * market.tx_cambio if hasattr(market, 'corn_cents_per_bu') else 55.0
+            basis = analyze_milho(market, yield_ctx, futures_curve)
+        else:
+            # Fallback para soja (incluindo café e boi que usarão proxy da soja por enquanto na POC)
+            basis = analyze_soja(market, yield_ctx, futures_curve)
         rag = to_rag_context(basis, yield_ctx)
         rag["esg_app_stress_pct"] = esg.app_stress_pct
         rag["market_meta"] = market_meta
@@ -156,6 +173,7 @@ class OrbitalOrchestrator:
             market_meta=market_meta,
             futures_curve=futures_curve,
             overlay_esg_bgr=overlay_esg,
+            all_ndvis_bgr=all_ndvis,
         )
 
 
@@ -227,6 +245,7 @@ def analysis_to_dict(analysis: OrbitalAnalysis) -> dict[str, Any]:
     return {
         "ndvi_summary": analysis.ndvi.summary,
         "ndvi_overlay_png_b64": _encode_image_bgr(overlay),
+        "all_ndvis_b64": {k: _encode_image_bgr(v) for k, v in analysis.all_ndvis_bgr.items()} if analysis.all_ndvis_bgr else {},
         "esg": {
             "compliant": analysis.esg_compliant,
             "red_flag": analysis.esg.red_flag,
@@ -255,7 +274,10 @@ def analysis_to_dict(analysis: OrbitalAnalysis) -> dict[str, Any]:
         },
         "rag_context": analysis.rag_context,
         "briefing_markdown": analysis.briefing_markdown,
-        "market_meta": analysis.market_meta,
+        "market_meta": {
+            **analysis.market_meta,
+            "cbot_cents": analysis.futures_curve[0] if analysis.futures_curve else 0,
+        },
     }
 
 

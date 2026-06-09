@@ -33,7 +33,7 @@ O **OrbitalBasis** é um copiloto de comercialização agrícola que une **Econo
 
 A POC processa bandas Red/NIR em NDVI matricial (OpenCV), prediz **risco de safra** com Random Forest treinado (MAE 0,024 · R² 0,9999 em dataset sintético), ingere telemetria ESP32 com filtro de banda na borda, consulta PTAX/B3 com fallback, calcula basis/PPE e curva de futuros, aplica **governança ESG** (Red Flag em APP com bloqueio automatizado de originação) e gera briefing via **RAG** (ChromaDB + LangChain).
 
-Camada distribuída: **FastAPI** (`/api/v1/analysis`, `/api/v1/hardware/telemetry`) e **dashboard Streamlit** para demonstração. Material **educacional** — não constitui recomendação de investimento.
+Camada distribuída: **FastAPI** (`/api/v1/analysis`, `/api/v1/hardware/telemetry`) para core logic e modelos matemáticos, e um poderoso **Dashboard em Next.js (React)** com interface vívida em Dark Mode para telemetria de 4 commodities simultâneas. Material **educacional** — não constitui recomendação de investimento.
 
 **OrbitalBasis Team. QUERO CONCORRER.**
 
@@ -101,15 +101,16 @@ pytest tests/ -q                # 53 testes
 uvicorn src.applications.api.main:app --reload --port 8000
 ```
 
-**Terminal 2 — Dashboard:**
+**Terminal 2 — Dashboard Next.js (Web App):**
 
 ```bash
-streamlit run src/applications/dashboard/app.py
-# ou: .\scripts\run_dashboard_api.ps1
+cd src/applications/web_app
+npm install
+npm run dev
 ```
 
 - API: http://127.0.0.1:8000/docs  
-- Dashboard: http://127.0.0.1:8501  
+- Dashboard: http://localhost:3000  
 
 **Docker:** `docker compose up --build`
 
@@ -127,6 +128,7 @@ python scripts/train_yield_risk.py
 | Versão | Data | Descrição |
 |--------|------|-----------|
 | 1.0.0 | 03/06/2026 | Entrega Global Solution 2026.1 — MVP OrbitalBasis (ML, NDVI, ESG, API, dashboard, RAG) |
+| 1.1.0 | 09/06/2026 | Migração para Dashboard Next.js + Tailwind, Suporte a 4 Culturas Simultâneas (Soja, Milho, Café, Boi), Telemetria IoT e refatoração do pipeline sintético NDVI. |
 
 ---
 
