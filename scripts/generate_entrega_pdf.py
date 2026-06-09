@@ -1,10 +1,11 @@
 """
-Gera PDF único de entrega FIAP a partir do conteúdo documentado.
+Gera PDF de entrega FIAP espelhando docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt
 Saída: docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -22,46 +23,46 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "docs" / "PDF_ENTREGA_FIAP_COPIAR_WORD.txt"
 OUTPUT = ROOT / "docs" / "OrbitalBasis_Entrega_FIAP_2026.1.pdf"
+
+SEP_HEAVY = re.compile(r"^═+$")
+SEP_LIGHT = re.compile(r"^=+$")
+INDENT = re.compile(r"^    \S")
 
 
 def _styles():
     base = getSampleStyleSheet()
     return {
-        "title": ParagraphStyle(
-            "title",
+        "section": ParagraphStyle(
+            "section",
             parent=base["Heading1"],
-            fontSize=14,
-            leading=18,
+            fontSize=11,
+            leading=14,
             alignment=TA_CENTER,
-            spaceAfter=12,
+            spaceBefore=10,
+            spaceAfter=10,
+            fontName="Helvetica-Bold",
             textColor=colors.HexColor("#1a1a2e"),
         ),
         "podium": ParagraphStyle(
             "podium",
             parent=base["Normal"],
-            fontSize=13,
-            leading=16,
+            fontSize=12,
+            leading=15,
             alignment=TA_CENTER,
-            spaceAfter=14,
+            spaceBefore=6,
+            spaceAfter=10,
             fontName="Helvetica-Bold",
-        ),
-        "h1": ParagraphStyle(
-            "h1",
-            parent=base["Heading1"],
-            fontSize=13,
-            leading=16,
-            spaceBefore=14,
-            spaceAfter=8,
-            textColor=colors.HexColor("#16213e"),
         ),
         "h2": ParagraphStyle(
             "h2",
             parent=base["Heading2"],
-            fontSize=11,
-            leading=14,
+            fontSize=10,
+            leading=13,
             spaceBefore=10,
-            spaceAfter=6,
+            spaceAfter=5,
+            fontName="Helvetica-Bold",
         ),
         "body": ParagraphStyle(
             "body",
@@ -69,275 +70,215 @@ def _styles():
             fontSize=10,
             leading=14,
             alignment=TA_JUSTIFY,
-            spaceAfter=8,
+            spaceAfter=7,
         ),
-        "bullet": ParagraphStyle(
-            "bullet",
+        "indent": ParagraphStyle(
+            "indent",
             parent=base["Normal"],
             fontSize=10,
             leading=13,
-            leftIndent=18,
+            leftIndent=20,
             spaceAfter=4,
         ),
         "code": ParagraphStyle(
             "code",
             parent=base["Code"],
+            fontName="Courier",
             fontSize=8,
             leading=10,
-            leftIndent=12,
-            backColor=colors.HexColor("#f4f4f4"),
+            leftIndent=16,
+            rightIndent=8,
+            backColor=colors.HexColor("#f5f5f5"),
+            borderColor=colors.HexColor("#dddddd"),
+            borderWidth=0.5,
+            borderPadding=6,
             spaceAfter=8,
-        ),
-        "link": ParagraphStyle(
-            "link",
-            parent=base["Normal"],
-            fontSize=10,
-            leading=13,
-            textColor=colors.HexColor("#0d47a1"),
-            spaceAfter=6,
         ),
         "note": ParagraphStyle(
             "note",
             parent=base["Italic"],
             fontSize=9,
             leading=12,
-            textColor=colors.HexColor("#555555"),
-            spaceAfter=8,
+            textColor=colors.HexColor("#444444"),
+            spaceAfter=7,
+        ),
+        "footer": ParagraphStyle(
+            "footer",
+            parent=base["Normal"],
+            fontSize=9,
+            leading=12,
+            alignment=TA_CENTER,
+            textColor=colors.HexColor("#666666"),
+            spaceBefore=12,
         ),
     }
 
 
-def build_story():
+def _load_body_lines() -> list[str]:
+    raw = SOURCE.read_text(encoding="utf-8").splitlines()
+    out: list[str] = []
+    started = False
+    for line in raw:
+        if "FIM DO DOCUMENTO" in line:
+            break
+        if not started:
+            if "PÁGINA 1" in line:
+                started = True
+            continue
+        out.append(line.rstrip())
+    while out and not out[-1].strip():
+        out.pop()
+    return out
+
+
+def _is_subsection(line: str) -> bool:
+    return bool(re.match(r"^\d+\.\d+\s+\S", line.strip()))
+
+
+def _escape_xml(text: str) -> str:
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def build_story_from_txt() -> list:
     s = _styles()
-    story = []
+    story: list = []
+    lines = _load_body_lines()
+    i = 0
+    page_break_sections = {
+        "3. RESULTADOS ESPERADOS",
+        "4. CONCLUSÕES",
+        "5. LINKS DE ENTREGA",
+    }
 
-    # --- Página 1 ---
-    story.append(Spacer(1, 1.5 * cm))
-    story.append(Paragraph("Global Solution FIAP 2026.1", s["title"]))
-    story.append(Paragraph("A Nova Economia Espacial", s["title"]))
-    story.append(Spacer(1, 0.8 * cm))
-    story.append(Paragraph("OrbitalBasis Team. QUERO CONCORRER.", s["podium"]))
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#cccccc")))
-    story.append(Spacer(1, 0.4 * cm))
-    story.append(Paragraph("<b>Integrantes</b>", s["h2"]))
-    for line in [
-        "Tiago Alves Cordeiro — RM 561791 — 561791@fiap.com.br",
-        "Leandro Arthur Marinho Ferreira — RM 565240 — 565240@fiap.com.br",
-        "Otavio Custodio de Oliveira — RM 565606 — 565606@fiap.com.br",
-        "Matheus José Parra — RM 561907 — 561907@fiap.com.br",
-    ]:
-        story.append(Paragraph(line, s["bullet"]))
-    story.append(Paragraph(
-        "<i>Ajuste os e-mails se o formato institucional da turma for diferente.</i>",
-        s["note"],
-    ))
-    story.append(Spacer(1, 0.3 * cm))
-    story.append(Paragraph(
-        "<b>Título:</b> OrbitalBasis — Copiloto Orbital de Comercialização Agrícola",
-        s["body"],
-    ))
-    story.append(Paragraph(
-        "<b>Entrega:</b> Prova de Conceito (POC) e MVP funcional — "
-        "Inteligência Artificial, 2º ano",
-        s["body"],
-    ))
-    story.append(PageBreak())
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
 
-    # --- 1. Introdução ---
-    story.append(Paragraph("1. INTRODUÇÃO", s["h1"]))
-    story.append(Paragraph(
-        "O agronegócio brasileiro opera com informações fragmentadas: o produtor enxerga "
-        "clima e solo; a mesa de operações enxerga basis, curva de futuros e câmbio. Poucas "
-        "ferramentas unem dados orbitais (satélite), telemetria de borda (IoT) e indicadores "
-        "financeiros em um fluxo único de decisão com governança ESG.",
-        s["body"],
-    ))
-    story.append(Paragraph(
-        "O <b>OrbitalBasis</b> é uma POC/MVP que demonstra essa integração: processamento de "
-        "NDVI por visão computacional, predição de risco de safra por Machine Learning, motor "
-        "de basis e PPE (PTAX BCB e B3), compliance ESG automatizado (Red Flag em APP) e "
-        "copiloto comercial com RAG (ChromaDB e LangChain).",
-        s["body"],
-    ))
-    story.append(Paragraph(
-        "<b>Escopo:</b> bandas sintéticas e datasets de fallback; métricas de ML sobre rótulos "
-        "heurísticos (transparência acadêmica). Material educacional — não constitui "
-        "recomendação de investimento.",
-        s["body"],
-    ))
+        if not stripped:
+            i += 1
+            continue
 
-    # --- 2. Desenvolvimento ---
-    story.append(Paragraph("2. DESENVOLVIMENTO", s["h1"]))
-    story.append(Paragraph("2.1 Arquitetura geral", s["h2"]))
-    for line in [
-        "(1) Órbita — NDVI matricial e segmentação (OpenCV/NumPy).",
-        "(2) Campo — ESP32 com filtragem na borda.",
-        "(3) Mercado — PTAX, B3, curva de futuros, basis, briefing RAG.",
-        "Distribuído: FastAPI (/api/v1/analysis) + Streamlit.",
-    ]:
-        story.append(Paragraph(line, s["bullet"]))
+        if SEP_HEAVY.match(stripped):
+            # collect title until next heavy sep or content
+            i += 1
+            title_parts: list[str] = []
+            while i < len(lines):
+                nxt = lines[i].strip()
+                if not nxt:
+                    i += 1
+                    continue
+                if SEP_HEAVY.match(nxt):
+                    i += 1
+                    break
+                title_parts.append(nxt)
+                i += 1
+            title = " ".join(title_parts).strip()
+            if title:
+                if any(title.startswith(sec) for sec in page_break_sections):
+                    story.append(PageBreak())
+                story.append(Spacer(1, 0.2 * cm))
+                story.append(Paragraph(_escape_xml(title), s["section"]))
+                story.append(HRFlowable(width="100%", thickness=0.8, color=colors.HexColor("#999999")))
+            continue
 
-    story.append(Paragraph("2.2 Visão computacional — NDVI", s["h2"]))
-    story.append(Preformatted(
-        "def compute_ndvi_matrix(red, nir):\n"
-        "    # NDVI = (NIR - Red) / (NIR + Red)\n"
-        "    red_f = red.astype('float32')\n"
-        "    nir_f = nir.astype('float32')\n"
-        "    denom = nir_f + red_f\n"
-        "    denom = where(denom == 0, nan, denom)\n"
-        "    return (nir_f - red_f) / denom",
-        s["code"],
-    ))
+        if stripped == "OrbitalBasis Team. QUERO CONCORRER.":
+            story.append(Paragraph(_escape_xml(stripped), s["podium"]))
+            i += 1
+            continue
 
-    story.append(Paragraph("2.3 Machine Learning — risco de safra", s["h2"]))
-    story.append(Paragraph(
-        "RandomForestRegressor (120 estimadores). Alvo: yield_risk_score (0–100). "
-        "Features: ndvi_mean, ndvi_std, stress_pct_*, soil_moisture_pct.",
-        s["body"],
-    ))
-    story.append(Preformatted(
-        "python scripts/generate_training_dataset.py --rows 8000\n"
-        "python scripts/train_yield_risk.py",
-        s["code"],
-    ))
-    story.append(Paragraph(
-        "Métricas: MAE = 0,024 | R² = 0,9999 | 8.000 amostras (treino 6.400 / teste 1.600).",
-        s["body"],
-    ))
-    story.append(Preformatted(
-        "def ml_enabled():\n"
-        "    if getenv('ORBITAL_USE_ML_YIELD_RISK', 'true') == 'false':\n"
-        "        return False\n"
-        "    return Path('models/yield_risk_v1.joblib').exists()",
-        s["code"],
-    ))
-    story.append(Paragraph(
-        "<i>Nota: R² elevado reflete dataset sintético; produção exigiria rótulos de safra reais.</i>",
-        s["note"],
-    ))
+        if stripped.startswith("[ESPAÇO RESERVADO"):
+            story.append(Paragraph(f"<i>{_escape_xml(stripped)}</i>", s["note"]))
+            i += 1
+            continue
 
-    story.append(Paragraph("2.4 Motor de mercado", s["h2"]))
-    story.append(Paragraph(
-        "SojaBasisEngine: basis atual, indicativo ajustado por risco de safra, convergência, "
-        "contango/backwardation.",
-        s["body"],
-    ))
+        if stripped.startswith("(") and stripped.endswith(")") and "Ajuste" in stripped:
+            story.append(Paragraph(f"<i>{_escape_xml(stripped)}</i>", s["note"]))
+            i += 1
+            continue
 
-    story.append(Paragraph("2.5 Governança ESG", s["h2"]))
-    story.append(Preformatted(
-        "if not yield_ctx.esg_compliant:\n"
-        "    return BasisResult(\n"
-        "        commodity='soja',\n"
-        "        basis_atual=0.0,\n"
-        "        basis_indicativo=0.0,\n"
-        "        hedge_stance=ESG_BLOCK,\n"
-        "    )",
-        s["code"],
-    ))
+        if _is_subsection(stripped):
+            story.append(Paragraph(_escape_xml(stripped), s["h2"]))
+            i += 1
+            continue
 
-    story.append(Paragraph("2.6 IoT, RAG e testes", s["h2"]))
-    for line in [
-        "ESP32: transmissão se desvio ≥ 15% ou janela horária.",
-        "RAG: ChromaDB + LangChain (deterministic / hybrid / llm).",
-        "pytest: 25 testes automatizados.",
-    ]:
-        story.append(Paragraph(line, s["bullet"]))
+        if stripped.endswith(":") and not INDENT.match(line):
+            story.append(Paragraph(f"<b>{_escape_xml(stripped)}</b>", s["body"]))
+            i += 1
+            continue
 
-    story.append(Paragraph("2.7 Integração Fases 3 e 4 (FIAP)", s["h2"]))
-    for line in [
-        "Visão computacional — NDVI OpenCV",
-        "Machine Learning — Random Forest + yield_risk_predictor.py",
-        "IA generativa — RAG ChromaDB + LangChain",
-        "IoT / Edge — firmware ESP32",
-        "Apps distribuídas — FastAPI + Streamlit",
-        "Web scraping — PTAX BCB + B3",
-    ]:
-        story.append(Paragraph(line, s["bullet"]))
+        # Indented block (code or lista)
+        if INDENT.match(line):
+            block: list[str] = []
+            while i < len(lines) and (INDENT.match(lines[i]) or (lines[i].strip() == "" and i + 1 < len(lines) and INDENT.match(lines[i + 1]))):
+                if lines[i].strip():
+                    block.append(lines[i][4:])
+                elif block:
+                    break
+                i += 1
+            text = "\n".join(block)
+            if any(k in text for k in ("def ", "if ", "return ", "python ", "pytest", "uvicorn", "streamlit", "cd ", "pip ")):
+                story.append(Preformatted(text, s["code"]))
+            else:
+                for bl in block:
+                    story.append(Paragraph(_escape_xml(bl), s["indent"]))
+            continue
 
-    story.append(Paragraph("2.8 Como executar", s["h2"]))
-    story.append(Preformatted(
-        "pip install -r requirements.txt\n"
-        "pytest tests/ -q\n"
-        "uvicorn src.applications.api.main:app --reload --port 8000\n"
-        "streamlit run src/applications/dashboard/app.py",
-        s["code"],
-    ))
-    story.append(PageBreak())
+        if stripped.startswith("Frase de encerramento:"):
+            story.append(Paragraph(f"<b>{_escape_xml(stripped)}</b>", s["body"]))
+            i += 1
+            continue
 
-    # --- 3. Resultados ---
-    story.append(Paragraph("3. RESULTADOS ESPERADOS", s["h1"]))
-    for line in [
-        "Dashboard com Campo (NDVI, risco safra) e Mercado (curva, basis).",
-        "ML ativo na sidebar (ex.: risco 64/100).",
-        "ESG OK padrão; RED FLAG simulado bloqueia basis.",
-        "API JSON: ndvi_summary, esg, basis, briefing_markdown.",
-        "Métricas ML reproduzíveis (MAE 0,024; R² 0,9999).",
-    ]:
-        story.append(Paragraph(f"• {line}", s["bullet"]))
-    story.append(Paragraph(
-        "<i>Evidência visual: vídeo demonstrativo e dashboard em "
-        "http://127.0.0.1:8501 (ver repositório).</i>",
-        s["note"],
-    ))
+        # Parágrafo normal — agrupa linhas contínuas
+        para = [stripped]
+        i += 1
+        while i < len(lines):
+            nxt = lines[i].strip()
+            if (
+                not nxt
+                or SEP_HEAVY.match(nxt)
+                or INDENT.match(lines[i])
+                or _is_subsection(nxt)
+                or nxt == "OrbitalBasis Team. QUERO CONCORRER."
+                or nxt.endswith(":") and len(nxt) < 80
+                or nxt.startswith("[ESPAÇO")
+            ):
+                break
+            para.append(nxt)
+            i += 1
+        story.append(Paragraph(_escape_xml(" ".join(para)), s["body"]))
 
-    # --- 4. Conclusões ---
-    story.append(Paragraph("4. CONCLUSÕES", s["h1"]))
-    story.append(Paragraph(
-        "O OrbitalBasis cumpre o escopo da Global Solution 2026.1: órbita, campo e mercado "
-        "integrados com ML, ESG e camada distribuída demonstrável em vídeo de até 5 minutos.",
-        s["body"],
-    ))
-    story.append(Paragraph(
-        "<b>Limitações:</b> dados sintéticos, labels heurísticos, APP em máscara demo.",
-        s["body"],
-    ))
-    story.append(Paragraph(
-        "<b>OrbitalBasis:</b> da órbita ao campo, do campo ao mercado. "
-        "<b>OrbitalBasis Team. QUERO CONCORRER.</b>",
-        s["podium"],
-    ))
-    story.append(PageBreak())
-
-    # --- 5. Links ---
-    story.append(Paragraph("5. LINKS DE ENTREGA", s["h1"]))
-    story.append(Paragraph(
-        "<b>Repositório GitHub:</b><br/>"
-        "https://github.com/tiagoalvescordeiro/orbitalbasis",
-        s["link"],
-    ))
-    story.append(Paragraph(
-        "<b>Vídeo (YouTube — NÃO LISTADO):</b><br/>"
-        "[Inserir URL após gravação]",
-        s["link"],
-    ))
-    story.append(Paragraph(
-        "<b>Arquitetura:</b><br/>"
-        "https://github.com/tiagoalvescordeiro/orbitalbasis/blob/main/docs/ARQUITETURA.md",
-        s["link"],
-    ))
-    story.append(Spacer(1, 1 * cm))
-    story.append(Paragraph(
-        "Material educacional. Não constitui recomendação de investimento.",
-        s["note"],
-    ))
-
+    story.append(Spacer(1, 0.5 * cm))
+    story.append(HRFlowable(width="60%", thickness=0.5, color=colors.HexColor("#cccccc")))
+    story.append(
+        Paragraph(
+            "FIM DO DOCUMENTO — OrbitalBasis Team · Global Solution FIAP 2026.1",
+            s["footer"],
+        )
+    )
     return story
 
 
 def main() -> Path:
+    if not SOURCE.exists():
+        raise FileNotFoundError(f"Fonte não encontrada: {SOURCE}")
+
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     doc = SimpleDocTemplate(
         str(OUTPUT),
         pagesize=A4,
-        leftMargin=2 * cm,
-        rightMargin=2 * cm,
+        leftMargin=2.2 * cm,
+        rightMargin=2.2 * cm,
         topMargin=2 * cm,
         bottomMargin=2 * cm,
         title="OrbitalBasis — Entrega FIAP 2026.1",
         author="OrbitalBasis Team",
     )
-    doc.build(build_story())
-    print(f"PDF gerado: {OUTPUT}")
+    doc.build(build_story_from_txt())
+    print(f"PDF gerado (formato .txt): {OUTPUT}")
     print(f"Tamanho: {OUTPUT.stat().st_size / 1024:.1f} KB")
     return OUTPUT
 
