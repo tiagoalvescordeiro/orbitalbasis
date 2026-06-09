@@ -5,6 +5,7 @@ Indexação ChromaDB (embeddings locais) para base de conhecimento OrbitalBasis.
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 from pathlib import Path
 
@@ -12,8 +13,14 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 KNOWLEDGE_DIR = PROJECT_ROOT / "data" / "rag" / "knowledge"
-CHROMA_DIR = PROJECT_ROOT / "data" / "chroma_db"
 COLLECTION_NAME = "orbitalbasis_knowledge"
+
+
+def get_chroma_dir() -> Path:
+    override = os.getenv("ORBITAL_CHROMA_DIR")
+    if override:
+        return Path(override)
+    return PROJECT_ROOT / "data" / "chroma_db"
 
 
 def _chunk_text(text: str, chunk_size: int = 500, overlap: int = 80) -> list[str]:
@@ -39,8 +46,9 @@ def get_chroma_collection():
     import chromadb
     from chromadb.utils import embedding_functions
 
-    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-    client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    chroma_dir = get_chroma_dir()
+    chroma_dir.mkdir(parents=True, exist_ok=True)
+    client = chromadb.PersistentClient(path=str(chroma_dir))
     ef = embedding_functions.DefaultEmbeddingFunction()
     return client.get_or_create_collection(
         name=COLLECTION_NAME,
@@ -54,7 +62,7 @@ def build_chroma_index(force: bool = False) -> int:
     if force:
         import shutil
 
-        shutil.rmtree(CHROMA_DIR, ignore_errors=True)
+        shutil.rmtree(get_chroma_dir(), ignore_errors=True)
 
     collection = get_chroma_collection()
     if not force and collection.count() > 0:
@@ -76,7 +84,7 @@ def build_chroma_index(force: bool = False) -> int:
         return 0
 
     collection.add(ids=ids, documents=documents, metadatas=metadatas)
-    logger.info("Indexados %d chunks em %s", len(documents), CHROMA_DIR)
+    logger.info("Indexados %d chunks em %s", len(documents), get_chroma_dir())
     return len(documents)
 
 

@@ -17,3 +17,5 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: pytest tests/ -q
+        env:
+          ORBITAL_CHROMA_DIR: /tmp/orbitalbasis_chroma
