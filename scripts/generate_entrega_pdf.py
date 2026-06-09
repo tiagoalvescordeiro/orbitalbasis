@@ -32,7 +32,7 @@ from reportlab.platypus import (
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "PDF_ENTREGA_FIAP_COPIAR_WORD.txt"
 OUTPUT = ROOT / "docs" / "OrbitalBasis_Entrega_FIAP_2026.1.pdf"
-DASHBOARD_ASSET = ROOT / "assets" / "dashboard_demo.png"
+DASHBOARD_ASSET = ROOT / "assets" / "dashboard_multi.png"
 DOWNLOADS_COPY = Path.home() / "Downloads" / "OrbitalBasis_Entrega_FIAP_2026.1.pdf"
 
 PAGE_W, _ = A4

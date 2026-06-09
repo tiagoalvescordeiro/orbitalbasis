@@ -61,7 +61,7 @@ Três camadas integradas pelo componente OrbitalOrchestrator:
     (2) Campo — ESP32 com filtragem na borda; transmissão apenas em anomalia ou janela horária.
     (3) Mercado — PTAX, cotação soja B3, curva de futuros, basis atual versus indicativo, briefing RAG.
 
-Camada distribuída: API REST FastAPI (rotas /api/v1/analysis e /api/v1/hardware/telemetry) e dashboard Streamlit para demonstração e avaliação.
+Camada distribuída: API REST FastAPI (rotas /api/v1/analysis e /api/v1/hardware/telemetry) e dashboard Next.js (React) com visualização global de 4 culturas para demonstração e avaliação.
 
 
 2.2 Visão computacional — NDVI orbital
@@ -128,7 +128,7 @@ Cruzamento talhão e APP. Em violação simulada (parâmetro esg_red_flag), o mo
             narrative_hooks=["Inconformidade ESG detectada."],
         )
 
-No dashboard Streamlit, o checkbox "Simular Cenário de Risco ESG (Bandeira Vermelha)" dispara banner RED FLAG e zeragem de basis.
+No dashboard Next.js, o toggle de "Bandeira ESG" dispara banner RED FLAG e zeragem de basis.
 
 
 2.6 Automação, IoT e RAG
@@ -144,7 +144,7 @@ No dashboard Streamlit, o checkbox "Simular Cenário de Risco ESG (Bandeira Verm
     Machine Learning ............. Random Forest, MAE/R², yield_risk_predictor.py
     IA generativa ................ RAG ChromaDB + LangChain (briefing comercial)
     IoT / Edge computing ......... Firmware ESP32 com filtro de banda
-    Aplicações distribuídas ...... FastAPI + Streamlit consumindo /api/v1/analysis
+    Aplicações distribuídas ...... FastAPI + Next.js consumindo /api/v1/analysis
     Web scraping e APIs .......... PTAX BCB OData + B3 com fallback CSV
 
 
@@ -156,10 +156,12 @@ No dashboard Streamlit, o checkbox "Simular Cenário de Risco ESG (Bandeira Verm
     pip install -r requirements.txt
     pytest tests/ -q
     uvicorn src.applications.api.main:app --reload --port 8000
-    streamlit run src/applications/dashboard/app.py
+    cd src/applications/web_app
+    npm install
+    npm run dev
 
     API (documentação): http://127.0.0.1:8000/docs
-    Dashboard: http://127.0.0.1:8501
+    Dashboard: http://localhost:3000
 
 
 ════════════════════════════════════════════════════════════════════════════════
@@ -203,7 +205,7 @@ Repositório GitHub:
     https://github.com/tiagoalvescordeiro/orbitalbasis
 
 Vídeo demonstrativo (YouTube — visibilidade NÃO LISTADO):
-    Pendente — fora do escopo desta versão. Demonstração comprovada via repositório GitHub, assets e figura do dashboard neste PDF.
+    https://youtu.be/somacqAHMME
 
 Documentação complementar (arquitetura):
     https://github.com/tiagoalvescordeiro/orbitalbasis/blob/main/docs/ARQUITETURA.md
