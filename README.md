@@ -66,6 +66,7 @@ notebooks/    # Colab gratuito (treino ML)
 | PDF — texto para Word | [docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt](docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt) |
 | Checklist vídeo 5 min | [docs/CHECKLIST_GRAVACAO_5MIN.md](docs/CHECKLIST_GRAVACAO_5MIN.md) |
 | Checklist entrega final | [docs/ENTREGA_FINAL_CHECKLIST.md](docs/ENTREGA_FINAL_CHECKLIST.md) |
+| Conformidade enunciado FIAP | [docs/CONFORMIDADE_FIAP.md](docs/CONFORMIDADE_FIAP.md) |
 
 **Competição / pódio:** o grupo **OrbitalBasis Team** declara interesse em participar do **pódio** da Global Solution 2026.1 e autoriza avaliação do vídeo e do repositório para esse fim.
 
@@ -126,10 +127,11 @@ python scripts/train_yield_risk.py
 
 - [Especificação da API](docs/API_SPECIFICATION.md)
 - [Roteiro de vídeo 5 min](docs/ROTEIRO_DO_VIDEO.md)
-- [ML local](docs/ML_GETTING_STARTED.md) · [Colab gratuito](docs/ML_COLAB_GRATUITO.md)
+- [ML local](docs/ML_GETTING_STARTED.md) · [Colab gratuito](docs/ML_COLAB_GRATUITO.md) · [Vertex GCP (opcional)](docs/ML_VERTEX_GCP.md)
 
 ---
 
 ## Licença
 
-Projeto acadêmico — FIAP Global Solution 2026.1.
+Projeto acadêmico — FIAP Global Solution 2026.1.  
+Licenciado sob [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE), conforme [modelo Git FIAP](https://github.com/CaiqueFiap-2026/TEMPLATE-TIAO-2026).

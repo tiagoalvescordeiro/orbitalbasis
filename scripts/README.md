@@ -10,6 +10,7 @@ Utilitários para subir o ecossistema, indexar RAG e validar a POC.
 | `run_dashboard_api.ps1` | Dashboard em modo distribuído (consome FastAPI em :8000) |
 | `generate_training_dataset.py` | Gera Parquet para ML (yield_risk) |
 | `train_yield_risk.py` | Treina Random Forest local (sem GCP) |
+| `gcp_train_commands.sh` | Treino ML no Vertex AI Workbench (opcional, créditos GCP) |
 | `publish_github.ps1` | Publicação auxiliar no GitHub |
 | `generate_entrega_pdf.py` | Gera PDF de entrega FIAP (`docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf`) |
 

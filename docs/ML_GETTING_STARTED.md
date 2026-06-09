@@ -50,4 +50,10 @@ ORBITAL_USE_ML_YIELD_RISK=false
 
 ## Próximo passo (GCP — opcional)
 
-Quando quiserem usar créditos: subir o Parquet para **Cloud Storage** e rodar o mesmo `train_yield_risk.py` no **Vertex AI Workbench** (CPU barata). Não é obrigatório para a FIAP.
+Quando quiserem usar créditos FIAP/educação: subir o Parquet para **Cloud Storage** e rodar o treino no **Vertex AI Workbench** (CPU barata). Não é obrigatório para a entrega.
+
+- Guia: [ML_VERTEX_GCP.md](ML_VERTEX_GCP.md)
+- Notebook: `notebooks/train_yield_risk_vertex.ipynb`
+- Script: `bash scripts/gcp_train_commands.sh`
+
+Alternativa **gratuita**: [ML_COLAB_GRATUITO.md](ML_COLAB_GRATUITO.md).

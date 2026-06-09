@@ -7,12 +7,17 @@
 ## Repositório GitHub
 
 - [x] Código MVP (ML, NDVI, ESG, API, dashboard, RAG, ESP32)
-- [x] README alinhado ao template (integrantes, execução, pódio)
-- [x] 25 testes pytest passando
-- [ ] E-mails institucionais confirmados no README e PDF
-- [ ] Tutor e Coordenador preenchidos no README
-- [ ] `git push` com modelo ML e documentação atualizados
-- [ ] Link do vídeo no README (seção Links)
+- [x] README alinhado ao [template FIAP Global-Solution-2](https://github.com/CaiqueFiap-2026/TEMPLATE-TIAO-2026/tree/main/2TIAO/Global-Solution-2) (integrantes, execução, pódio, histórico)
+- [x] Estrutura `src/`, `data/`, `docs/` + extensões `models/`, `scripts/`, `tests/`, `notebooks/`
+- [x] 25 testes pytest passando (validado localmente em 09/06/2026)
+- [x] Modelo `models/yield_risk_v1.joblib` e métricas no repositório remoto
+- [x] PDF `docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf` no GitHub
+- [x] Docs GCP Vertex (`ML_VERTEX_GCP.md`, notebook e script) — incluir no próximo push
+- [x] Licença CC BY 4.0 (`LICENSE`) + workflow CI pytest
+- [ ] E-mails institucionais confirmados com a turma (README e PDF)
+- [ ] Tutor(a) e Coordenador(a) preenchidos no README
+- [ ] `git push` final após preencher vídeo e professores
+- [ ] Link do vídeo no README, PDF e portal FIAP
 
 ---
 
