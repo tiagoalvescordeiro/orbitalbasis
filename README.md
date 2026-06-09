@@ -61,7 +61,7 @@ notebooks/    # Colab gratuito (treino ML)
 |------|-----|
 | Repositório GitHub | https://github.com/tiagoalvescordeiro/orbitalbasis |
 | Vídeo (YouTube, **não listado**) | _[preencher após gravação]_ |
-| PDF único (entrega) | _[preencher após exportar docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt]_ |
+| PDF único (entrega) | [docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf](docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf) |
 | Arquitetura | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) |
 | PDF — texto para Word | [docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt](docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt) |
 | Checklist vídeo 5 min | [docs/CHECKLIST_GRAVACAO_5MIN.md](docs/CHECKLIST_GRAVACAO_5MIN.md) |

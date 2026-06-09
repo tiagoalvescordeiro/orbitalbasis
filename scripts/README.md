@@ -11,6 +11,7 @@ Utilitários para subir o ecossistema, indexar RAG e validar a POC.
 | `generate_training_dataset.py` | Gera Parquet para ML (yield_risk) |
 | `train_yield_risk.py` | Treina Random Forest local (sem GCP) |
 | `publish_github.ps1` | Publicação auxiliar no GitHub |
+| `generate_entrega_pdf.py` | Gera PDF de entrega FIAP (`docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf`) |
 
 ### Exemplos
 

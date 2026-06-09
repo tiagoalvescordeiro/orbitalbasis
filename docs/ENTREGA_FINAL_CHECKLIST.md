@@ -18,7 +18,8 @@
 
 ## PDF único
 
-- [ ] Abrir `PDF_ENTREGA_FIAP_COPIAR_WORD.txt` → colar no Word
+- [x] PDF gerado: `docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf` (`python scripts/generate_entrega_pdf.py`)
+- [ ] (Opcional) Abrir `PDF_ENTREGA_FIAP_COPIAR_WORD.txt` → Word se quiser personalizar + print dashboard
 - [ ] Página 1: **OrbitalBasis Team. QUERO CONCORRER.** + 4 nomes + e-mails
 - [ ] Seções: Introdução, Desenvolvimento, Resultados, Conclusões, Links
 - [ ] Código em texto (Consolas) — **sem screenshot de código**
