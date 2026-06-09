@@ -61,7 +61,7 @@ notebooks/    # Colab gratuito (treino ML)
 | Item | URL |
 |------|-----|
 | Repositório GitHub | https://github.com/tiagoalvescordeiro/orbitalbasis |
-| Vídeo (YouTube, **não listado**) | _[preencher após gravação]_ |
+| Vídeo (YouTube, **não listado**) | https://youtu.be/somacqAHMME |
 | PDF único (entrega) | [docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf](docs/OrbitalBasis_Entrega_FIAP_2026.1.pdf) |
 | Arquitetura | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) |
 | PDF — texto para Word | [docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt](docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt) |
@@ -70,9 +70,9 @@ notebooks/    # Colab gratuito (treino ML)
 | Conformidade enunciado FIAP | [docs/CONFORMIDADE_FIAP.md](docs/CONFORMIDADE_FIAP.md) |
 | Assets visuais (dashboard, NDVI, arquitetura) | [assets/README.md](assets/README.md) |
 
-**Pré-visualização do dashboard:**
+**Pré-visualização do dashboard (Múltiplas Culturas & Visão Computacional):**
 
-![Dashboard demo ESG OK](assets/dashboard_demo.png)
+![Dashboard Visão Global Múltiplas Culturas](assets/dashboard_multi.png)
 
 **Competição / pódio:** o grupo **OrbitalBasis Team** declara interesse em participar do **pódio** da Global Solution 2026.1 e autoriza avaliação do vídeo e do repositório para esse fim.
 
