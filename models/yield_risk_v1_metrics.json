@@ -1,11 +1,11 @@
 {
   "model": "RandomForestRegressor",
   "n_estimators": 120,
-  "rows_total": 3000,
-  "rows_train": 2400,
-  "rows_test": 600,
-  "mae": 0.067,
-  "r2": 0.9995,
+  "rows_total": 8000,
+  "rows_train": 6400,
+  "rows_test": 1600,
+  "mae": 0.024,
+  "r2": 0.9999,
   "features": [
     "ndvi_mean",
     "ndvi_std",

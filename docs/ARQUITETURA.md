@@ -89,7 +89,7 @@ flowchart LR
 | Disciplina | Evidência no projeto |
 |------------|----------------------|
 | Visão computacional | Cálculo NDVI em matriz; segmentação verde/amarelo/vermelho |
-| Machine Learning | `yield_risk_hint` agregado a partir de NDVI + estresse |
+| Machine Learning | Random Forest (`yield_risk_predictor.py`) — MAE 0,024 · R² 0,9999; fallback heurístico |
 | IA generativa / RAG | ChromaDB + LangChain (`ORBITAL_RAG_MODE`) |
 | IoT / Edge | Firmware filtro 15% + janela horária; `TelemetryStore` |
 | Apps distribuídas | FastAPI + Streamlit consumindo `/api/v1/analysis` |

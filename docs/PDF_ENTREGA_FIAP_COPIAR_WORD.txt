@@ -1,0 +1,214 @@
+================================================================================
+COMO USAR ESTE ARQUIVO
+================================================================================
+1. Abra o Bloco de Notas ou selecione tudo (Ctrl+A) neste arquivo.
+2. Cole no Microsoft Word ou Google Docs.
+3. Selecione trechos de código e aplique fonte Consolas ou Courier New, tamanho 9 ou 10.
+4. Título e nomes na página 1: fonte Arial ou Calibri, 12 pt, negrito onde indicado.
+5. Insira UMA captura do dashboard na seção 3 (Resultados), se desejar.
+6. Preencha o link do YouTube na seção 5.
+7. Exportar: Arquivo > Salvar como > PDF (um único arquivo).
+8. NÃO envie screenshots de código — apenas o texto abaixo.
+================================================================================
+
+
+════════════════════════════════════════════════════════════════════════════════
+PÁGINA 1 — IDENTIFICAÇÃO (OBRIGATÓRIA)
+════════════════════════════════════════════════════════════════════════════════
+
+OrbitalBasis Team. QUERO CONCORRER.
+
+Integrantes (nome completo, RM e e-mail):
+
+    Tiago Alves Cordeiro ................. RM 561791 .... 561791@fiap.com.br
+    Leandro Arthur Marinho Ferreira ...... RM 565240 .... 565240@fiap.com.br
+    Otavio Custodio de Oliveira .......... RM 565606 .... 565606@fiap.com.br
+    Matheus José Parra ................... RM 561907 .... 561907@fiap.com.br
+
+(Ajuste os e-mails se o formato institucional da turma for diferente.)
+
+Título do projeto:
+    OrbitalBasis — Copiloto Orbital de Comercialização Agrícola
+
+Disciplina / entrega:
+    Global Solution FIAP 2026.1 — A Nova Economia Espacial
+    Curso: Inteligência Artificial — 2º ano
+    Prova de Conceito (POC) e MVP funcional
+
+
+════════════════════════════════════════════════════════════════════════════════
+1. INTRODUÇÃO
+════════════════════════════════════════════════════════════════════════════════
+
+O agronegócio brasileiro opera com informações fragmentadas: o produtor enxerga clima e solo; a mesa de operações enxerga basis, curva de futuros e câmbio. Poucas ferramentas unem dados orbitais (satélite), telemetria de borda (IoT) e indicadores financeiros em um fluxo único de decisão com governança ESG.
+
+O OrbitalBasis é uma POC/MVP que demonstra essa integração para cooperativas e mesas de commodities: processamento de NDVI por visão computacional, predição de risco de safra por Machine Learning, motor de basis e PPE com dados de mercado (PTAX do Banco Central e B3), compliance ESG automatizado (Red Flag em Área de Preservação Permanente — APP) e copiloto comercial com RAG (ChromaDB e LangChain).
+
+Escopo da POC: ambiente de demonstração com bandas sintéticas e datasets de fallback; métricas de ML obtidas sobre rótulos heurísticos gerados pelo próprio pipeline, com transparência acadêmica. O material é educacional e não constitui recomendação de investimento.
+
+Objetivo da entrega: comprovar aplicação de IA, automação e computação à Nova Economia Espacial, conforme o eixo da Global Solution FIAP 2026.1.
+
+
+════════════════════════════════════════════════════════════════════════════════
+2. DESENVOLVIMENTO
+════════════════════════════════════════════════════════════════════════════════
+
+2.1 Arquitetura geral
+
+Três camadas integradas pelo componente OrbitalOrchestrator:
+
+    (1) Órbita — bandas Red e NIR convertidas em NDVI matricial e segmentação (OpenCV e NumPy).
+    (2) Campo — ESP32 com filtragem na borda; transmissão apenas em anomalia ou janela horária.
+    (3) Mercado — PTAX, cotação soja B3, curva de futuros, basis atual versus indicativo, briefing RAG.
+
+Camada distribuída: API REST FastAPI (rotas /api/v1/analysis e /api/v1/hardware/telemetry) e dashboard Streamlit para demonstração e avaliação.
+
+
+2.2 Visão computacional — NDVI orbital
+
+O NDVI não é consumido pronto; é calculado pixel a pixel conforme o código abaixo (fonte: src/ml_models/ndvi_processor.py):
+
+    def compute_ndvi_matrix(red, nir):
+        # NDVI = (NIR - Red) / (NIR + Red)
+        red_f = red.astype("float32")
+        nir_f = nir.astype("float32")
+        denom = nir_f + red_f
+        denom = where(denom == 0, nan, denom)
+        return (nir_f - red_f) / denom
+
+A segmentação triclass (saudável, atenção, estresse severo) alimenta o resumo do talhão (ndvi_mean, percentuais de estresse) exibido no dashboard.
+
+Decisão arquitetural: manter processamento local no orquestrador para reduzir dependência de APIs externas na demonstração FIAP.
+
+
+2.3 Machine Learning — risco de safra
+
+Modelo: RandomForestRegressor com 120 estimadores.
+Alvo: yield_risk_score (escala 0 a 100).
+Features: ndvi_mean, ndvi_std, stress_pct_severe, stress_pct_attention, stress_pct_healthy, soil_moisture_pct.
+
+Pipeline reproduzível (terminal):
+
+    python scripts/generate_training_dataset.py --rows 8000
+    python scripts/train_yield_risk.py
+
+Métricas versionadas no arquivo models/yield_risk_v1_metrics.json:
+
+    MAE (erro médio absoluto): 0,024
+    R² (coeficiente de determinação): 0,9999
+    Amostras totais: 8.000 (treino: 6.400 | teste: 1.600)
+
+Integração na POC (fonte: src/ml_models/yield_risk_predictor.py):
+
+    def ml_enabled():
+        if getenv("ORBITAL_USE_ML_YIELD_RISK", "true") == "false":
+            return False
+        return arquivo_modelo_joblib_existe()
+
+Treino alternativo gratuito: notebook Google Colab (notebooks/train_yield_risk_colab.ipynb), documentado no repositório.
+
+Nota técnica: o R² elevado reflete dataset sintético alinhado à heurística de geração; em ambiente real seria necessário rotular com dados de safra observados em campo.
+
+
+2.4 Motor de mercado — basis, curva e convergência
+
+O módulo SojaBasisEngine calcula basis atual (CBOT, PTAX e preço físico), basis indicativo ajustado pelo risco de safra e lacuna de convergência. A curva de futuros classifica contango ou backwardation, conforme material de derivativos agrícolas.
+
+
+2.5 Governança ESG automatizada
+
+Cruzamento talhão e APP. Em violação simulada (parâmetro esg_red_flag), o motor bloqueia originação (fonte: src/core_logic/basis_engine.py):
+
+    if not yield_ctx.esg_compliant:
+        return BasisResult(
+            commodity="soja",
+            basis_atual=0.0,
+            basis_indicativo=0.0,
+            hedge_stance=ESG_BLOCK,
+            narrative_hooks=["Inconformidade ESG detectada."],
+        )
+
+No dashboard Streamlit, o checkbox "Simular Cenário de Risco ESG (Bandeira Vermelha)" dispara banner RED FLAG e zeragem de basis.
+
+
+2.6 Automação, IoT e RAG
+
+    ESP32 (field_node.ino): média móvel local; transmissão se desvio igual ou superior a 15% ou na janela horária.
+    RAG: base data/rag/knowledge/ indexada em ChromaDB; modos deterministic, hybrid e llm.
+    Testes automatizados: pytest com 25 testes (NDVI, basis, ML, RAG, mercado).
+
+
+2.7 Integração das disciplinas — Fases 3 e 4 (FIAP)
+
+    Visão computacional .......... NDVI matricial e limiarização OpenCV
+    Machine Learning ............. Random Forest, MAE/R², yield_risk_predictor.py
+    IA generativa ................ RAG ChromaDB + LangChain (briefing comercial)
+    IoT / Edge computing ......... Firmware ESP32 com filtro de banda
+    Aplicações distribuídas ...... FastAPI + Streamlit consumindo /api/v1/analysis
+    Web scraping e APIs .......... PTAX BCB OData + B3 com fallback CSV
+
+
+2.8 Como executar (reprodutibilidade para o avaliador)
+
+    cd orbitalbasis
+    python -m venv .venv
+    .venv\Scripts\activate
+    pip install -r requirements.txt
+    pytest tests/ -q
+    uvicorn src.applications.api.main:app --reload --port 8000
+    streamlit run src/applications/dashboard/app.py
+
+    API (documentação): http://127.0.0.1:8000/docs
+    Dashboard: http://127.0.0.1:8501
+
+
+════════════════════════════════════════════════════════════════════════════════
+3. RESULTADOS ESPERADOS
+════════════════════════════════════════════════════════════════════════════════
+
+Ao executar a POC, o avaliador deve observar:
+
+    (1) Dashboard funcional com painel Campo (NDVI e risco de safra) e painel Mercado (curva e basis).
+    (2) Risco de safra numérico (exemplo: 64/100) com indicação de ML ativo na barra lateral.
+    (3) Cenário ESG OK no padrão; RED FLAG ao simular violação em APP, com basis bloqueado.
+    (4) API REST retornando JSON com ndvi_summary, esg, basis e briefing_markdown.
+    (5) Métricas ML reproduzíveis (MAE 0,024; R² 0,9999) via scripts locais ou Google Colab.
+
+Resultado de negócio (demonstração): visão unificada órbita, campo e mercado para apoiar a conversa entre produtor e mesa de operações. Material educacional, sem promessa de rentabilidade.
+
+[ESPAÇO RESERVADO: inserir aqui UMA figura — captura de tela do dashboard em funcionamento. Não usar imagem para trechos de código.]
+
+
+════════════════════════════════════════════════════════════════════════════════
+4. CONCLUSÕES
+════════════════════════════════════════════════════════════════════════════════
+
+O OrbitalBasis cumpre o escopo da Global Solution 2026.1 ao aplicar IA e automação à Nova Economia Espacial: dados orbitais processados localmente, telemetria filtrada na borda, Machine Learning para risco de safra, governança ESG com bloqueio automatizado e camada distribuída (API e dashboard) demonstrável em vídeo de até cinco minutos.
+
+Limitações declaradas: dados sintéticos e fallback em PTAX-B3 e bandas de demonstração; rótulos de ML derivados de heurística; máscara retangular de APP na POC.
+
+Trabalhos futuros: integração com imagens Sentinel reais, APP com GeoJSON e geopandas, rotulagem com dados agronômicos reais e deploy em nuvem com observabilidade.
+
+Frase de encerramento:
+
+    OrbitalBasis: da órbita ao campo, do campo ao mercado.
+    OrbitalBasis Team. QUERO CONCORRER.
+
+
+════════════════════════════════════════════════════════════════════════════════
+5. LINKS DE ENTREGA (ÚLTIMA PÁGINA — OBRIGATÓRIO)
+════════════════════════════════════════════════════════════════════════════════
+
+Repositório GitHub:
+    https://github.com/tiagoalvescordeiro/orbitalbasis
+
+Vídeo demonstrativo (YouTube — visibilidade NÃO LISTADO):
+    [COLE AQUI O LINK DO YOUTUBE APÓS A GRAVAÇÃO]
+
+Documentação complementar (arquitetura):
+    https://github.com/tiagoalvescordeiro/orbitalbasis/blob/main/docs/ARQUITETURA.md
+
+
+================================================================================
+FIM DO DOCUMENTO — OrbitalBasis Team · Global Solution FIAP 2026.1
+================================================================================

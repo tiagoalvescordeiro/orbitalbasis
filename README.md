@@ -1,152 +1,132 @@
-# OrbitalBasis
+# FIAP — Global Solution 2026.1 · A Nova Economia Espacial
 
-Copiloto orbital de comercialização agrícola — **Global Solution FIAP 2026.1** (*A Nova Economia Espacial*).
+# OrbitalBasis — Copiloto Orbital de Comercialização Agrícola
 
-Conecta **visão computacional** (NDVI matricial), **edge IoT** (ESP32 com filtragem de banda), **compliance ESG** (APP), **web scraping/API de mercado** (PTAX BCB + B3) e **motor de basis/PPE** com briefing RAG para cooperativas e mesas de operações.
+## Nome do grupo
 
-> Material **educacional**. Não constitui recomendação de investimento.
+**OrbitalBasis Team**
+
+## Integrantes
+
+| Nome completo | RM | E-mail |
+|---------------|-----|--------|
+| Tiago Alves Cordeiro | 561791 | 561791@fiap.com.br |
+| Leandro Arthur Marinho Ferreira | 565240 | 565240@fiap.com.br |
+| Otavio Custodio de Oliveira | 565606 | 565606@fiap.com.br |
+| Matheus José Parra | 561907 | 561907@fiap.com.br |
+
+> Se o e-mail institucional for diferente, atualize esta tabela e o PDF antes do envio.
+
+## Professores
+
+### Tutor(a)
+
+- _[Nome do tutor — preencher conforme turma]_
+
+### Coordenador(a)
+
+- _[Nome do coordenador — preencher conforme turma]_
+
+## Descrição
+
+O **OrbitalBasis** é um copiloto de comercialização agrícola que une **Economia Espacial** (dados orbitais), **edge IoT** e **mercado físico** de commodities.
+
+A POC processa bandas Red/NIR em NDVI matricial (OpenCV), prediz **risco de safra** com Random Forest treinado (MAE 0,024 · R² 0,9999 em dataset sintético), ingere telemetria ESP32 com filtro de banda na borda, consulta PTAX/B3 com fallback, calcula basis/PPE e curva de futuros, aplica **governança ESG** (Red Flag em APP com bloqueio automatizado de originação) e gera briefing via **RAG** (ChromaDB + LangChain).
+
+Camada distribuída: **FastAPI** (`/api/v1/analysis`, `/api/v1/hardware/telemetry`) e **dashboard Streamlit** para demonstração. Material **educacional** — não constitui recomendação de investimento.
+
+**OrbitalBasis Team. QUERO CONCORRER.**
 
 ---
 
-## Arquitetura
+## Estrutura de pastas
+
+Alinhada ao [template FIAP TIAO 2026](https://github.com/CaiqueFiap-2026/TEMPLATE-TIAO-2026) (`src`, `data`, `docs`), com extensões justificadas para MVP:
 
 ```
-Satélite (Red/NIR) → NDVIProcessor (OpenCV)
-ESP32 (edge)       → TelemetryStore → API
-BCB PTAX + B3 SJC  → MarketDataService → SojaBasisEngine
-ESG APP            → ESGCompliance
-OrbitalOrchestrator → FastAPI + Streamlit
+src/          # Código-fonte (NDVI, ML, basis, ESG, RAG, API, dashboard, ESP32)
+data/         # CSV sintéticos, knowledge RAG, training/
+docs/         # Arquitetura, API, PDF, roteiro vídeo, checklists
+models/       # yield_risk_v1.joblib + métricas
+scripts/      # Treino ML, demo, RAG, start_all
+tests/        # pytest (25 testes)
+notebooks/    # Colab gratuito (treino ML)
 ```
 
 ---
 
-## Quick start
+## Links e observações
+
+| Item | URL |
+|------|-----|
+| Repositório GitHub | https://github.com/tiagoalvescordeiro/orbitalbasis |
+| Vídeo (YouTube, **não listado**) | _[preencher após gravação]_ |
+| PDF único (entrega) | _[preencher após exportar docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt]_ |
+| Arquitetura | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) |
+| PDF — texto para Word | [docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt](docs/PDF_ENTREGA_FIAP_COPIAR_WORD.txt) |
+| Checklist vídeo 5 min | [docs/CHECKLIST_GRAVACAO_5MIN.md](docs/CHECKLIST_GRAVACAO_5MIN.md) |
+| Checklist entrega final | [docs/ENTREGA_FINAL_CHECKLIST.md](docs/ENTREGA_FINAL_CHECKLIST.md) |
+
+**Competição / pódio:** o grupo **OrbitalBasis Team** declara interesse em participar do **pódio** da Global Solution 2026.1 e autoriza avaliação do vídeo e do repositório para esse fim.
+
+**Decisões técnicas:** dados de mercado e bandas satelitais em modo demo/sintético na POC; labels de ML gerados por heurística documentada em `models/yield_risk_v1_metrics.json`.
+
+---
+
+## Como executar o código
+
+**Pré-requisitos:** Python 3.11+, `pip`, opcional Docker.
 
 ```bash
+git clone https://github.com/tiagoalvescordeiro/orbitalbasis.git
 cd orbitalbasis
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate          # Windows
 pip install -r requirements.txt
-pytest tests/ -q
-python scripts/run_demo.py
+python scripts/index_rag.py     # opcional — RAG
+pytest tests/ -q                # 25 testes
 ```
 
-### API (distribuído)
+**Terminal 1 — API:**
 
 ```bash
-uvicorn src.applications.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn src.applications.api.main:app --reload --port 8000
 ```
 
-Endpoints:
+**Terminal 2 — Dashboard:**
 
-| Método | Rota | Descrição |
+```bash
+streamlit run src/applications/dashboard/app.py
+# ou: .\scripts\run_dashboard_api.ps1
+```
+
+- API: http://127.0.0.1:8000/docs  
+- Dashboard: http://127.0.0.1:8501  
+
+**Docker:** `docker compose up --build`
+
+**Treino ML (local):**
+
+```bash
+python scripts/generate_training_dataset.py --rows 8000
+python scripts/train_yield_risk.py
+```
+
+---
+
+## Histórico de lançamentos
+
+| Versão | Data | Descrição |
 |--------|------|-----------|
-| GET/POST | `/api/v1/analysis` | Pipeline completo (`esg_red_flag`, `soil_moisture_pct`, `saca_rs`) |
-| POST | `/api/v1/hardware/telemetry` | Ingestão pacote ESP32 (anomalia edge) |
-| GET | `/api/v1/hardware/telemetry` | Últimos pacotes |
-
-### Docker Compose (API + Dashboard)
-
-```bash
-copy .env.example .env
-docker compose up --build
-```
-
-- API: http://localhost:8000/docs  
-- Dashboard: http://localhost:8501  
-
-### RAG (ChromaDB + LangChain)
-
-```bash
-python scripts/index_rag.py          # indexa knowledge/
-python scripts/index_rag.py --force  # reindexar
-```
-
-| `ORBITAL_RAG_MODE` | Comportamento |
-|--------------------|---------------|
-| `deterministic` | Template fixo (demo offline) |
-| `hybrid` (padrão) | Template + trechos Chroma |
-| `llm` | LangChain + OpenAI se `OPENAI_API_KEY` definida |
-
-### Dashboard (vídeo 5 min)
-
-```bash
-streamlit run src/applications/dashboard/app.py
-```
-
-Sidebar: **Simular Cenário de Risco ESG (Red Flag)**.
-
-Modo API remota (opcional):
-
-```bash
-set ORBITAL_USE_API=true
-set ORBITAL_API_URL=http://127.0.0.1:8000
-streamlit run src/applications/dashboard/app.py
-```
+| 1.0.0 | 03/06/2026 | Entrega Global Solution 2026.1 — MVP OrbitalBasis (ML, NDVI, ESG, API, dashboard, RAG) |
 
 ---
 
-## Estrutura do repositório
+## Documentação técnica
 
-```
-src/                                 # Código (ver src/README.md)
-├── ml_models/ndvi_processor.py      # NDVI matricial + limiarização
-├── core_logic/                      # Basis, PPE, ESG, orchestrator
-├── market_data/                     # PTAX BCB + B3
-├── data_collection/                 # Telemetria ESP32
-├── rag/                             # ChromaDB + copiloto
-├── applications/                    # FastAPI + Streamlit
-└── hardware/esp32/field_node.ino
-docs/                                # Arquitetura, API, roteiros
-data/                                # Synthetic + knowledge RAG
-tests/                               # pytest
-models/                              # Template FIAP (ML em src/ml_models)
-notebooks/                           # Template FIAP (demos via scripts/)
-scripts/                             # run_demo, index_rag, start_all
-```
-
----
-
-## Módulos principais (facades)
-
-| Classe | Arquivo |
-|--------|---------|
-| `NDVIProcessor` | `ndvi_processor.py` |
-| `SojaBasisEngine` | `basis_engine.py` |
-| `ESGCompliance` | `esg_compliance.py` |
-| `OrbitalOrchestrator` | `orchestrator.py` |
-
----
-
-## Web scraping e fallbacks
-
-1. **PTAX:** API OData BCB → scraping página BCB → `data/synthetic/ptax_history.csv`
-2. **B3 SJC:** scraping página derivativos B3 → `data/synthetic/b3_quotes_sjc.csv`
-
-Logs indicam a fonte utilizada (`bcb_odata`, `b3_scrape`, `csv_fallback`).
-
----
-
-## Documentação
-
-- [Arquitetura do sistema](docs/ARQUITETURA.md)
-- [Especificação da API REST](docs/API_SPECIFICATION.md)
-- [Roteiro de vídeo 5 min](docs/ROTEIRO_DO_VIDEO.md) · [VIDEO_SCRIPT.md](docs/VIDEO_SCRIPT.md)
-- [ML local (risco de safra)](docs/ML_GETTING_STARTED.md)
-- [ML gratuito no Google Colab](docs/ML_COLAB_GRATUITO.md)
-- Fórmulas basis/PPE: `src/core_logic/basis_engine.py`
-- Prompt RAG: `src/rag/prompts/briefing_template.txt`
-
----
-
-## Equipe FIAP
-
-| Nome | RM |
-|------|-----|
-| Tiago Alves Cordeiro | 561791 |
-| Leandro Arthur Marinho Ferreira | 565240 |
-| Otavio Custodio de Oliveira | 565606 |
-| Matheus José Parra | 561907 |
+- [Especificação da API](docs/API_SPECIFICATION.md)
+- [Roteiro de vídeo 5 min](docs/ROTEIRO_DO_VIDEO.md)
+- [ML local](docs/ML_GETTING_STARTED.md) · [Colab gratuito](docs/ML_COLAB_GRATUITO.md)
 
 ---
 
